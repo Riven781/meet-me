@@ -70,16 +70,15 @@ main {
 
 .author-container {
   display: flex;
-  gap: 7px;
+  gap: 16px;
   justify-content: flex-start;
   align-items: center;
 }
 
 .author-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
+  width: clamp(10px, 20vw, 40px);
+  height: clamp(10px, 20vw, 40px);
+  border-radius: 50%;  
   object-fit: cover;
 }
 
@@ -90,8 +89,43 @@ main {
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
-
 }
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-information {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.post-date{
+  font-size: clamp(10px, 3.0vw, 18px);
+  color: rgba(0, 0, 0, 0.534);
+}
+
+.add-btn{
+  font-size: clamp(10px, 5.0vw, 20px);
+  background-color: transparent;
+  border-radius: 50%;
+  border: none;
+  width: clamp(10px, 20vw, 40px);
+  height: clamp(10px, 20vw, 40px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-btn:hover{
+  background: radial-gradient( ellipse 65% 65% at 50% 50%, rgba(241, 124, 235, 0.295) 0%, transparent 80%);
+  transform: scale(1.3);
+}
+
 
 .post-content {
   padding: 10px 0;
@@ -171,6 +205,11 @@ main {
   align-items: center;
   justify-content: center;
   gap: 5px;
+  
+}
+
+.interactions-btn:hover{
+  transform: scale(1.3);
 }
 
 .reaction-btn {
@@ -196,6 +235,7 @@ main {
 .comment-btn:hover {
   background:
     radial-gradient(ellipse 65% 65% at 50% 50%, rgba(145, 145, 145, 0.726) 0%, transparent 80%);
+  
 }
 
 
@@ -287,6 +327,7 @@ h1 {
   .post {
     padding: 5px;
     border-radius: 0;
+    border: none;
 
   }
 
