@@ -29,96 +29,147 @@
   </header>
 
 
-
+  <!-- main -->
   <main>
 
     <section class="create-post">
       <form class="post-form">
-        <textarea id="post-text" rows="4"  placeholder="What's on your mind ?"></textarea>
+        <textarea id="post-text" rows="4" placeholder="What's on your mind ?"></textarea>
         <div class="post-btn-wrapper">
           <button type="submit" id="post-btn">Post</button>
         </div>
-        
+
       </form>
     </section>
 
-    <article class="post">
-      <div class="post-header">
-        <div class="author-container">
-          <img src="images/default-avatar.jpg" alt="image" class="author-image">
-          <div class="post-information">
-            <h2 class="author-name">
+    <section class="posts">
+
+    </section>
+    <article>
+      <section class="post">
+        <div class="post-header">
+          <div class="author-container">
+            <img src="images/default-avatar.jpg" alt="image" class="author-image">
+            <div class="post-information">
+              <h2 class="author-name">
+                John Doe
+              </h2>
+              <div class="post-date">
+                2 hours ago
+              </div>
+            </div>
+
+          </div>
+          <button class="add-btn">
+
+            ➕
+          </button>
+
+        </div>
+        <div class="post-content-wrpapper">
+          <div class="post-content">
+            <p>
+
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+            </p>
+          </div>
+
+          <div class="post-interactions">
+            <div class="reactions">
+              <div class="interaction-wrapper reactions-wrapper">
+                <button class="reaction-btn interactions-btn heart-btn">
+                  ❤️
+                </button>
+                1.2k
+              </div>
+              <div class="interaction-wrapper reactions-wrapper">
+                <button class="reaction-btn interactions-btn">
+                  👍
+                </button>
+                2
+              </div>
+              <div class="interaction-wrapper reactions-wrapper">
+
+                <button class="reaction-btn interactions-btn">
+                  👎
+                </button>
+                190
+              </div>
+            </div>
+
+            <div class="right-buttons">
+              <button class="interactions-btn save-btn">
+                📌
+              </button>
+
+
+              <div class="interaction-wrapper">
+                <button class="interactions-btn comment-btn">
+                  💬
+                </button>
+                312
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </section>
+
+      <section class="comments">
+        <form class="post-form">
+          <textarea id="comment-text" rows="2" placeholder="Write comment..."></textarea>
+          <div class="post-btn-wrapper">
+            <button type="submit" id="post-btn">Post</button>
+          </div>
+
+        </form>
+        <h1>Comments</h1>
+        <div class="comment">
+          <img src="images/default-avatar.jpg" alt="image" class="comment-author-image">
+          <div class="comment-data">
+            <h2 class="comment-author-name">
               John Doe
             </h2>
-            <div class="post-date">
+            <div class="comment-content">
+              <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+              </p>
+            </div>
+
+            <div class="comment-date">
               2 hours ago
             </div>
+
+
           </div>
+          <div class="comment-hearts-wrapper">
+            <button class="heart-comment-btn">
+              🖤
 
-        </div>
-        <button class="add-btn">
-          
-          ➕
-        </button>
-      
-      </div>
-
-      <div class="post-content-wrpapper">
-        <div class="post-content">
-          <p>
-
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-          </p>
-        </div>
-
-
-        <div class="post-interactions">
-          <div class="reactions">
-            <div class="interaction-wrapper reactions-wrapper">
-              <button class="reaction-btn interactions-btn heart-btn">
-                ❤️
-              </button>
-              1.2k
-            </div>
-            <div class="interaction-wrapper reactions-wrapper">
-              <button class="reaction-btn interactions-btn">
-                👍
-              </button>
-              2
-            </div>
-            <div class="interaction-wrapper reactions-wrapper">
-
-              <button class="reaction-btn interactions-btn">
-                👎
-              </button>
-              190
-            </div>
-          </div>
-
-          <div class="right-buttons">
-            <button class="interactions-btn save-btn">
-              📌
             </button>
-
-
-            <div class="interaction-wrapper">
-              <button class="interactions-btn comment-btn">
-                💬
-              </button>
-              312
+            <div class="reactions-number">
+              43
             </div>
-
-
 
           </div>
 
 
+
+
+
+
+
+
         </div>
 
-      </div>
+      </section>
 
     </article>
 

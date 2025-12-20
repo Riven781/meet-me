@@ -296,6 +296,18 @@ main {
   transition: background 0.2s ease-in-out;
 }
 
+.interactions-btn[data-liked = "true"]{
+
+  box-shadow: 0px 0px 1px 1px rgb(255, 174, 0) inset,
+  0px 0px 1px 1px rgb(255, 174, 0);
+  border-radius: 40%;
+ 
+}
+
+.like-count[data-liked = "true"]{
+  color: rgb(255, 174, 0);
+}
+
 
 .reaction-btn:hover {
   background:
@@ -336,6 +348,99 @@ h1 {
   font-family: var(--header-font);
   color: rgb(255, 255, 255);
 
+}
+
+.posts{
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.comments{
+  padding: 10px 0;
+  background-color: rgb(240, 238, 238);
+
+}
+
+.comment{
+
+  background-color: rgb(212, 212, 212);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: start;
+  gap: 8px;
+
+}
+
+.comment-author-image{
+
+  width: clamp(8px, 14vw, 40px);
+  height: clamp(8px, 14vw, 40px);
+  border-radius: 50%;  
+  object-fit: cover;
+}
+
+.comment-content{
+  max-width: 100%;
+
+  flex-wrap: wrap;
+  font-size: clamp(10px, 4.0vw, 16px);
+}
+
+
+
+.comment-date{
+  font-size: clamp(10px, 4vw, 13px);
+  color: rgba(0, 0, 0, 0.534);
+}
+
+.comment-author-name{
+  font-size: clamp(10px, 4.8vw, 20px);
+}
+
+.heart-comment-btn{
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: clamp(10px, 5.0vw, 15px);
+}
+
+.comment-hearts-wrapper{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 4px;
+}
+
+.reactions-number{
+  font-size: clamp(10px, 3.0vw, 14px);
+  color: rgba(0, 0, 0, 0.534);
+}
+
+#comment-text{
+  resize: none;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  box-shadow: 0px 0px 1px 0px rgba(0, 0, 0, 0.75);
+  font-size: clamp(10px, 3.0vw, 14px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  background-color: rgb(255, 255, 255);
+}
+
+#comment-text:focus{
+  outline: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.75);
 }
 
 @media screen and (max-width: 684px) {
@@ -418,6 +523,12 @@ h1 {
   header {
     padding: 5px;
     flex-direction: row;
+  }
+
+  .comment{
+    gap: 2px;
+    padding: 2px;
+
   }
 
 
