@@ -45,6 +45,25 @@ async function loadPosts(){
 
 loadPosts();
 
+async function loadComments(){
+  const res = await fetch('./../data/comments.json');
+  const comments = await res.json();
+
+  const container =  document.querySelector('.comments');
+  container.innerHTML = "";
+
+  const fragment = document.createDocumentFragment();
+
+  comments.forEach(comment => {
+    const commentElement = createComment(comment);
+    fragment.appendChild(commentElement);
+  });
+
+  container.appendChild(fragment);
+}
+
+loadComments();
+
 
 function createPost(post){
   const article = document.createElement('article');
@@ -186,6 +205,94 @@ function createPost(post){
 
 
   return article;
+}
+
+
+function createComment(comment) {
+  const commentContainer = document.createElement('article');
+  commentContainer.classList.add('comment-container');
+
+  const commentEl = document.createElement('section');
+  commentEl.classList.add('comment');
+  commentContainer.appendChild(commentEl);
+
+  const commentAuthorImage = document.createElement('img');
+  commentAuthorImage.classList.add('comment-author-image');
+  commentAuthorImage.src = comment.authorImage;
+  commentEl.appendChild(commentAuthorImage);
+
+  const commentData = document.createElement('div');
+  commentData.classList.add('comment-data');
+  commentEl.appendChild(commentData);
+
+  const commentAuthorName = document.createElement('h2');
+  commentAuthorName.classList.add('comment-author-name');
+  commentAuthorName.textContent = comment.authorName;
+  commentData.appendChild(commentAuthorName);
+
+  const commentContent = document.createElement('div');
+  commentContent.classList.add('comment-content');
+  commentData.appendChild(commentContent);
+
+  const commentText = document.createElement('p');
+  commentText.textContent = comment.commentText;
+  commentContent.appendChild(commentText);
+
+  const commentBottomWrapper = document.createElement('div');
+  commentBottomWrapper.classList.add('comment-bottom-wrapper');
+  commentData.appendChild(commentBottomWrapper);
+
+  const commentDate = document.createElement('div');
+  commentDate.classList.add('comment-date');
+  commentDate.textContent = comment.createdAt;
+  commentBottomWrapper.appendChild(commentDate);
+
+  const replyBtn = document.createElement('button');
+  replyBtn.classList.add('reply-btn');
+  replyBtn.textContent = 'Reply';
+  commentBottomWrapper.appendChild(replyBtn);
+
+  const commentHeartsWrapper = document.createElement('div');
+  commentHeartsWrapper.classList.add('comment-hearts-wrapper');
+  commentEl.appendChild(commentHeartsWrapper);
+
+  const heartCommentBtn = document.createElement('button');
+  heartCommentBtn.classList.add('heart-comment-btn');
+  heartCommentBtn.textContent = '🖤';
+  commentHeartsWrapper.appendChild(heartCommentBtn);
+
+  const heartCommentCount = document.createElement('div');
+  heartCommentCount.classList.add('reactions-number');
+  heartCommentCount.textContent = comment.commentHearts;
+  commentHeartsWrapper.appendChild(heartCommentCount);
+
+  if (comment.commentReplies > 0) {
+    const seeMoreRepliesBtn = document.createElement('button');
+    seeMoreRepliesBtn.classList.add('see-more-btn');
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("class", "btn-icon");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+
+    const path = document.createElementNS(svgNS, "path");
+    path.setAttribute(
+      "d",
+      "M10 8L14 8V10L8 16L2 10V8H6V0L10 4.76995e-08V8Z"
+    );
+    path.setAttribute("fill", "currentColor");
+
+    svg.appendChild(path);
+
+    const span = document.createElement("span");
+    span.textContent = `See replies (${comment.commentReplies})`;
+    seeMoreRepliesBtn.appendChild(svg);
+    seeMoreRepliesBtn.appendChild(span);
+    commentContainer.appendChild(seeMoreRepliesBtn);
+  }
+
+  return commentContainer;
 }
 
 

@@ -359,17 +359,45 @@ h1 {
 
 
 .comments{
-  padding: 10px 0;
+  padding: 10px;
   background-color: rgb(240, 238, 238);
+  display: flex ;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 5px;
 
+}
+
+.comments-replies{
+  align-items: flex-end;
+  padding: 5px 0;
+  gap: 5px;
+  
+}
+
+.comment-container{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+
+  
+}
+
+
+
+.comment-reply{
+  width: 95%;
+  background-color: transparent;
 }
 
 .comment{
 
   background-color: rgb(212, 212, 212);
+ 
   padding: 10px;
   border-radius: 5px;
-  margin-bottom: 10px;
+ 
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: start;
@@ -443,6 +471,46 @@ h1 {
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.75);
 }
 
+.see-more-btn{
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: clamp(10px, 5.0vw, 15px);
+  color: rgba(0, 0, 0, 0.534);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  align-self: center;
+  
+
+}
+
+.btn-icon{
+  width:  clamp(10px, 5.0vw, 15px);
+  height: clamp(10px, 5.0vw, 15px);
+  color: rgba(0, 0, 0, 0.534);
+}
+
+
+.see-more-btn:hover{
+  text-decoration: underline;
+}
+
+.reply-btn{
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: clamp(10px, 5.0vw, 15px);
+  color: rgba(0, 0, 0, 0.534);
+}
+
+.comment-bottom-wrapper{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @media screen and (max-width: 684px) {
   main{
     padding: 10px 0;
@@ -473,6 +541,12 @@ h1 {
     width: 90%;
     margin: 0 auto;
   }
+
+  .comments{
+    padding: 10px 0;
+  }
+
+
 
 
 }

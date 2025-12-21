@@ -128,48 +128,120 @@
 
         </form>
         <h1>Comments</h1>
-        <div class="comment">
-          <img src="images/default-avatar.jpg" alt="image" class="comment-author-image">
-          <div class="comment-data">
-            <h2 class="comment-author-name">
-              John Doe
-            </h2>
-            <div class="comment-content">
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
-              </p>
+        <article class="comment-container">
+          <section class="comment">
+            <img src="images/default-avatar.jpg" alt="image" class="comment-author-image">
+            <div class="comment-data">
+              <h2 class="comment-author-name">
+                John Doe
+              </h2>
+              <div class="comment-content">
+                <p>
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                </p>
+              </div>
+
+              <div class="comment-bottom-wrapper">
+                <div class="comment-date">
+                  2 hours ago
+
+                </div>
+
+                <button class="reply-btn">
+                  Reply
+                </button>
+              </div>
+
+
+
+            </div>
+            <div class="comment-hearts-wrapper">
+              <button class="heart-comment-btn">
+                🖤
+
+              </button>
+              <div class="reactions-number">
+                43
+              </div>
+
             </div>
 
-            <div class="comment-date">
-              2 hours ago
-            </div>
+          </section>
+          <button class="see-more-btn see-replies-btn">
+            <svg class="btn-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 8L14 8V10L8 16L2 10V8H6V0L10 4.76995e-08V8Z" fill="currentColor" />
+            </svg>
+            <span>See replies more / comments</span>
+          </button>
+
+          <section class="comments-replies comments">
+            <article class="comment comment-reply"> <!-- comment reply -->
+              <img src="images/default-avatar.jpg" alt="image" class="comment-author-image">
+              <div class="comment-data">
+                <h2 class="comment-author-name">
+                  John Doe
+                </h2>
+                <div class="comment-content">
+                  <p>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?
+                  </p>
+                </div>
+
+                <div class="comment-bottom-wrapper">
+                  <div class="comment-date">
+                    2 hours ago
+
+                  </div>
+
+                  <button class="reply-btn">
+                    Reply
+                  </button>
+                </div>
+              </div>
+              <div class="comment-hearts-wrapper">
+                <button class="heart-comment-btn">
+                  🖤
+
+                </button>
+                <div class="reactions-number">
+                  43
+                </div>
 
 
-          </div>
-          <div class="comment-hearts-wrapper">
-            <button class="heart-comment-btn">
-              🖤
 
+
+
+
+            </article>
+
+            <button class="see-more-btn">
+              <svg class="btn-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 8L14 8V10L8 16L2 10V8H6V0L10 4.76995e-08V8Z" fill="currentColor" />
+              </svg>
+              <span>See more replies</span>
             </button>
-            <div class="reactions-number">
-              43
-            </div>
+          </section>
+        </article>
 
-          </div>
-
-
-
-
-
-
-
-
-        </div>
-
+        <button class="see-more-btn">
+          <svg class="btn-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 8L14 8V10L8 16L2 10V8H6V0L10 4.76995e-08V8Z" fill="currentColor" />
+          </svg>
+          <span>See more comments</span>
+        </button>
       </section>
+
+
+
 
     </article>
 
