@@ -26,31 +26,128 @@ window.addEventListener('resize', () => {
   textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
 });
 
-async function loadPosts(){
-  const res = await fetch('./../data/data.json');
-  const posts = await res.json();
+const appModel = {
+  posts: [],
+  commentsByPostId: {},
+  repliesByCommentId: {}
+}
 
-  const container =  document.querySelector('.posts');
-  container.innerHTML = "";
+let posts = [];
 
+
+async function loadPosts(lastId = null) {
+  const res = await fetch('./../data/posts.json');
+  const newPosts = await res.json();
+  appModel.posts.push(...newPosts);
+  //TODO: sprawdzaj czy nie załadowano tego samego posta 
+  renderNewPosts(newPosts);
+
+
+}
+
+function renderNewPosts(posts) {
+  const container = document.querySelector('.posts');
   const fragment = document.createDocumentFragment();
-
   posts.forEach(post => {
-    const postElement = createPost(post);
-    fragment.appendChild(postElement);
-  });
+    fragment.appendChild(createPost(post));
+  })
 
   container.appendChild(fragment);
 }
 
+
 loadPosts();
 
-async function loadComments(){
+async function loadComments(postId, postEl, firstLoad) {
+  let commentsByPostId = appModel.commentsByPostId[postId];
+
+  if (!commentsByPostId) {
+    commentsByPostId = {
+      items: [],
+      isLoading: false,
+      error: null,
+    };
+  }
+
+  if (commentsByPostId.isLoading) return;
+
+  commentsByPostId.isLoading = true;
+
   const res = await fetch('./../data/comments.json');
   const comments = await res.json();
 
-  const container =  document.querySelector('.comments');
-  container.innerHTML = "";
+  commentsByPostId.items.push(...comments);
+
+  commentsByPostId.isLoading = false;
+
+  appModel.commentsByPostId[postId] = commentsByPostId;
+
+
+  renderNewComments(comments, postEl, firstLoad);
+
+}
+
+async function loadReplies(commentId, commentEl) {
+  let repliesByCommentId = appModel.repliesByCommentId[commentId];
+
+  if (!repliesByCommentId) {
+    repliesByCommentId = {
+      items: [],
+      isLoading: false,
+      error: null,
+    };
+  }
+
+  if (repliesByCommentId.isLoading) return;
+
+  const res = await fetch('./../data/replies.json');
+  const replies = await res.json();
+
+  repliesByCommentId.items.push(...replies);
+
+  repliesByCommentId.isLoading = false;
+
+  appModel.repliesByCommentId[commentId] = repliesByCommentId;
+
+  renderNewReplies(replies, commentEl);
+}
+
+function renderNewReplies(replies, commentEl) {
+  console.log("tuu")
+  //w przyszłości będziemy tu przekazywali liste repplies orza zmienną isMore
+
+
+  
+
+  const container = commentEl.querySelector('.comments-replies');
+  container.classList.add('active');
+  console.log(container);
+
+  //commentEl.querySelector('.more-replies-btn').remove();  //usunięcie seeReplies
+
+  const fragment = document.createDocumentFragment();
+
+  replies.forEach(reply => {
+    const replyElement = createReply(reply);
+    fragment.appendChild(replyElement);
+  });
+
+  container.appendChild(fragment);
+
+  container.appendChild(commentEl.querySelector('.more-replies-btn'));  //seeReplies wędruje na koniec
+}
+
+
+function renderNewComments(comments, postEl, firstLoad) {
+  
+
+  const container = postEl.querySelector('.comments');
+  container.classList.add('active');
+
+  if (firstLoad) {
+    renderCommentTextArea(container);
+  }
+  
 
   const fragment = document.createDocumentFragment();
 
@@ -62,11 +159,39 @@ async function loadComments(){
   container.appendChild(fragment);
 }
 
-loadComments();
+
+function renderCommentTextArea(container) {
+  const form = document.createElement('form');
+  form.classList.add('post-form');
+  form.classList.add('comment-form');
+  container.appendChild(form);
+
+  const textarea = document.createElement('textarea');
+  textarea.id = 'comment-text';
+  textarea.rows = 2;
+  textarea.placeholder = 'Write comment...';
+  form.appendChild(textarea);
+
+  const postBtn = document.createElement('button');
+  postBtn.type = 'submit';
+  postBtn.id = 'create-comment-btn';
+  postBtn.textContent = 'Post this comment';
+  form.appendChild(postBtn);
+}
 
 
-function createPost(post){
+
+function clearComments(postEl) {
+  const container = postEl.querySelector('.comments');
+  container.classList.remove('active');
+  container.innerHTML = '';
+}
+
+
+
+function createPost(post) {
   const article = document.createElement('article');
+  article.classList.add('post-container');
   article.dataset.postId = post.id;
   const section = document.createElement('section');
 
@@ -141,7 +266,7 @@ function createPost(post){
   const heartCount = document.createElement('span');
   heartCount.textContent = post.postHearts;
   interactionHeartWrapper.appendChild(heartCount);
- 
+
 
   const interactionLikesWrapper = document.createElement('div');
   interactionLikesWrapper.classList.add('interaction-wrapper');
@@ -170,7 +295,7 @@ function createPost(post){
   dislikeBtn.classList.add('reaction-btn');
   interactionDislikesWrapper.appendChild(dislikeBtn);
   dislikeBtn.textContent = '👎';
-  
+
   const dislikeCount = document.createElement('span');
   dislikeCount.textContent = post.postDislikes;
   interactionDislikesWrapper.appendChild(dislikeCount);
@@ -188,7 +313,7 @@ function createPost(post){
 
   const interactionCommentsWrapper = document.createElement('div');
   interactionCommentsWrapper.classList.add('interaction-wrapper');
-  
+
   rightButtons.appendChild(interactionCommentsWrapper);
 
   const commentBtn = document.createElement('button');
@@ -196,10 +321,14 @@ function createPost(post){
   commentBtn.classList.add('comment-btn');
   interactionCommentsWrapper.appendChild(commentBtn);
   commentBtn.textContent = '💬';
-  
+
   const commentCount = document.createElement('span');
   commentCount.textContent = post.postComments;
   interactionCommentsWrapper.appendChild(commentCount);
+
+  const comments = document.createElement('section');
+  comments.classList.add('comments');
+  article.appendChild(comments);
 
 
 
@@ -210,6 +339,7 @@ function createPost(post){
 
 function createComment(comment) {
   const commentContainer = document.createElement('article');
+  commentContainer.dataset.commentId = comment.id;
   commentContainer.classList.add('comment-container');
 
   const commentEl = document.createElement('section');
@@ -269,6 +399,7 @@ function createComment(comment) {
   if (comment.commentReplies > 0) {
     const seeMoreRepliesBtn = document.createElement('button');
     seeMoreRepliesBtn.classList.add('see-more-btn');
+    seeMoreRepliesBtn.classList.add('more-replies-btn');
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("class", "btn-icon");
@@ -290,13 +421,108 @@ function createComment(comment) {
     seeMoreRepliesBtn.appendChild(svg);
     seeMoreRepliesBtn.appendChild(span);
     commentContainer.appendChild(seeMoreRepliesBtn);
+
+    const repliesContainer = document.createElement('section');
+    repliesContainer.classList.add('comments-replies');
+    repliesContainer.classList.add('comments');
+    commentContainer.appendChild(repliesContainer);
   }
 
   return commentContainer;
 }
 
+function createReply(reply){
+  const commentReply = document.createElement('article');
+  commentReply.classList.add('comment-reply');
+  commentReply.classList.add('comment');
+
+  const commentAuthorImage = document.createElement('img');
+  commentAuthorImage.classList.add('comment-author-image');
+  commentAuthorImage.src = reply.authorImage;
+  commentReply.appendChild(commentAuthorImage);
+
+  const commentData = document.createElement('div');
+  commentData.classList.add('comment-data');
+  commentReply.appendChild(commentData);
+
+  const commentAuthorName = document.createElement('h2');
+  commentAuthorName.classList.add('comment-author-name');
+  commentAuthorName.textContent = reply.authorName;
+  commentData.appendChild(commentAuthorName);
+
+  const commentContent = document.createElement('div');
+  commentContent.classList.add('comment-content');
+  commentData.appendChild(commentContent);
+
+  const commentText = document.createElement('p');
+  commentText.textContent = reply.commentText;
+  commentContent.appendChild(commentText);
+
+  const commentBottomWrapper = document.createElement('div');
+  commentBottomWrapper.classList.add('comment-bottom-wrapper');
+  commentData.appendChild(commentBottomWrapper);
+
+  const commentDate = document.createElement('div');
+  commentDate.classList.add('comment-date');
+  commentDate.textContent = reply.createdAt;
+  commentBottomWrapper.appendChild(commentDate);
+
+  const replyBtn = document.createElement('button');
+  replyBtn.classList.add('reply-btn');
+  replyBtn.textContent = 'Reply';
+  commentBottomWrapper.appendChild(replyBtn);
+
+  const commentHeartsWrapper = document.createElement('div');
+  commentHeartsWrapper.classList.add('comment-hearts-wrapper');
+  commentReply.appendChild(commentHeartsWrapper);
+
+  const heartCommentBtn = document.createElement('button');
+  heartCommentBtn.classList.add('heart-comment-btn');
+  heartCommentBtn.textContent = '🖤';
+  commentHeartsWrapper.appendChild(heartCommentBtn);
+
+  const heartCommentCount = document.createElement('div');
+  heartCommentCount.classList.add('reactions-number');
+  heartCommentCount.textContent = reply.commentHearts;
+  commentHeartsWrapper.appendChild(heartCommentCount);
+
+  return commentReply;
+}
+
+
 
 document.querySelector('.posts').addEventListener('click', (e) => {
+  if (e.target.matches(".comment-btn")) {
+    const postEl = e.target.closest(".post-container");
+    const currentPostId = postEl.dataset.postId;
+
+    for (const postId  in appModel.commentsByPostId) {
+      if (postId == currentPostId) continue;
+      delete appModel.commentsByPostId[postId];
+      const commentsToClose = document.querySelector(`.post-container[data-post-id="${postId}"]`);
+      clearComments(commentsToClose);
+    }
+
+    if (appModel.commentsByPostId[currentPostId]){
+      console.log('already loaded');
+      delete appModel.commentsByPostId[currentPostId];
+      clearComments(postEl);
+    }
+    else{
+      loadComments(currentPostId, postEl, true);
+    }
+  }
+
+  if (e.target.closest(".more-replies-btn")) { //czasami zdarzenie matchowało span lub svg a nie button
+    console.log('more replies');
+    const commentEl = e.target.closest(".comment-container");
+    const commentId = commentEl.dataset.commentId;
+    console.log(commentEl);
+    loadReplies(commentId, commentEl);
+  }
+
+  
+
   if (!e.target.matches(".like-btn")) return;
   const postEl = e.target.closest(".post");
   const postId = postEl.dataset.postId;

@@ -8,7 +8,8 @@
     "postHearts" : 10,
     "postLikes" : 1200,
     "postDislikes" : 100,
-    "postComments" : 3
+    "postComments" : 3,
+    "liked" : 0
   },
   {
     "id": 2,
@@ -19,7 +20,8 @@
     "postHearts" : 0,
     "postLikes" : 2,
     "postDislikes" : 100,
-    "postComments" : 3
+    "postComments" : 3,
+    "liked" : 1
   }
   ,
     {
@@ -31,7 +33,8 @@
     "postHearts" : 0,
     "postLikes" : 2,
     "postDislikes" : 100,
-    "postComments" : 3
+    "postComments" : 3,
+    "liked" : 2
   }
 
 ]
