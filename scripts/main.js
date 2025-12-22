@@ -117,7 +117,7 @@ function renderNewReplies(replies, commentEl) {
   //w przyszłości będziemy tu przekazywali liste repplies orza zmienną isMore
 
 
-  
+
 
   const container = commentEl.querySelector('.comments-replies');
   container.classList.add('active');
@@ -139,7 +139,7 @@ function renderNewReplies(replies, commentEl) {
 
 
 function renderNewComments(comments, postEl, firstLoad) {
-  
+
 
   const container = postEl.querySelector('.comments');
   container.classList.add('active');
@@ -147,7 +147,10 @@ function renderNewComments(comments, postEl, firstLoad) {
   if (firstLoad) {
     renderCommentTextArea(container);
   }
-  
+  else {
+    postEl.querySelector('.more-comments-btn').remove();  //usunięcie seeMore
+  }
+
 
   const fragment = document.createDocumentFragment();
 
@@ -157,6 +160,38 @@ function renderNewComments(comments, postEl, firstLoad) {
   });
 
   container.appendChild(fragment);
+
+  renderSeeMoreButton(container);
+
+}
+
+function renderSeeMoreButton(container) {
+
+
+  const seeMoreRepliesBtn = document.createElement('button');
+  seeMoreRepliesBtn.classList.add('see-more-btn');
+  seeMoreRepliesBtn.classList.add('more-comments-btn');
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("class", "btn-icon");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute(
+    "d",
+    "M10 8L14 8V10L8 16L2 10V8H6V0L10 4.76995e-08V8Z"
+  );
+  path.setAttribute("fill", "currentColor");
+
+  svg.appendChild(path);
+
+  const span = document.createElement("span");
+  span.textContent = `See more comments`;
+  seeMoreRepliesBtn.appendChild(svg);
+  seeMoreRepliesBtn.appendChild(span);
+  container.appendChild(seeMoreRepliesBtn);
 }
 
 
@@ -431,7 +466,7 @@ function createComment(comment) {
   return commentContainer;
 }
 
-function createReply(reply){
+function createReply(reply) {
   const commentReply = document.createElement('article');
   commentReply.classList.add('comment-reply');
   commentReply.classList.add('comment');
@@ -496,19 +531,19 @@ document.querySelector('.posts').addEventListener('click', (e) => {
     const postEl = e.target.closest(".post-container");
     const currentPostId = postEl.dataset.postId;
 
-    for (const postId  in appModel.commentsByPostId) {
+    for (const postId in appModel.commentsByPostId) {
       if (postId == currentPostId) continue;
       delete appModel.commentsByPostId[postId];
       const commentsToClose = document.querySelector(`.post-container[data-post-id="${postId}"]`);
       clearComments(commentsToClose);
     }
 
-    if (appModel.commentsByPostId[currentPostId]){
+    if (appModel.commentsByPostId[currentPostId]) {
       console.log('already loaded');
       delete appModel.commentsByPostId[currentPostId];
       clearComments(postEl);
     }
-    else{
+    else {
       loadComments(currentPostId, postEl, true);
     }
   }
@@ -521,7 +556,14 @@ document.querySelector('.posts').addEventListener('click', (e) => {
     loadReplies(commentId, commentEl);
   }
 
-  
+  if (e.target.closest(".more-comments-btn")) {
+
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+    loadComments(postId, postEl, false);
+  }
+
+
 
   if (!e.target.matches(".like-btn")) return;
   const postEl = e.target.closest(".post");

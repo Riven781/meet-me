@@ -337,6 +337,10 @@ main {
   gap: 5px;
 }
 
+.more-comments-btn{
+  margin-bottom: 5px ;
+}
+
 
 h1 {
   font-size: clamp(10px, 8.4vw, 26px);
@@ -480,11 +484,19 @@ h1 {
   width: 100%;
   max-width: 100%;
   background-color: rgb(255, 255, 255);
+
+
 }
 
 #comment-text:focus{
   outline: 1px solid rgba(0, 0, 0, 0.2);
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.75);
+}
+
+.comment-form{
+  position: sticky;
+  top: 0;
+  background-color: rgb(255, 255, 255); /*moze zmienię w przyszłości*/
 }
 
 .see-more-btn{
