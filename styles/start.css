@@ -1,0 +1,194 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --header-font: "Permanent Marker";
+  --font-size: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  grid-template-areas:
+    "main"
+    "footer";
+  grid-template-rows: 1fr auto;
+  grid-template-columns: 1fr;
+  background-color: rgb(8, 8, 8);
+  /*8, 8, 8*/
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+
+
+}
+
+.wrapper {
+  padding: 40px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+
+  box-shadow: 0px 0px 10px 1px rgba(255, 255, 255, 0.75);
+}
+
+.logo {
+  font-family: var(--header-font);
+  color: rgb(255, 255, 255);
+  font-size: clamp(10px, 10vw, 33px);
+  text-align: center;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(255, 255, 255);
+  gap: 0px;
+  color: black;
+  border-radius: 15px;
+  padding: 4px;
+}
+
+label {
+  display: none;
+  padding-left: 5px;
+  font-size: clamp(5px, 3.5vw, 14px);
+  color: rgba(75, 75, 75, 0.774);
+
+}
+
+input {
+  padding: 5px;
+  border: none;
+  font-size: clamp(5px, 4.0vw, 17px);
+  border-radius: 5px;
+}
+
+
+
+input:focus {
+  outline: none;
+
+}
+
+
+.submit-btn {
+  padding: 5px;
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0px 0px 10px 0px rgba(255, 255, 255, 0.75);
+  font-size: clamp(10px, 5.5vw, 17px);
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.877);
+  color: rgb(255, 255, 255);
+}
+
+.submit-btn:hover {
+  background-color: rgba(255, 255, 255, 0.877);
+  color: rgb(0, 0, 0);
+  transform: scale(1.05);
+}
+
+.option {
+  margin-top: 50px;
+}
+
+.option>p {
+  text-align: center;
+  font-size: clamp(10px, 4.0vw, 17px);
+  color: rgba(255, 255, 255, 0.774);
+}
+
+.option-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: clamp(10px, 5.0vw, 15px);
+  color: rgb(100, 1, 1);
+  font-weight: bold;
+  text-decoration: underline;
+
+}
+
+.hide {
+  display: none;
+}
+
+@media screen and (max-width: 300px) {
+  .wrapper {
+    box-shadow: none;
+    border-radius: 0px;
+    padding: 0px;
+    gap: 10px
+  }
+
+  .option {
+    margin-top: 10px;
+  }
+}
+
+
+@media screen and (max-width: 200px) {
+  input {
+    border-radius: 0;
+
+  }
+
+  input:focus {
+    outline: none;
+  }
+
+  .field {
+    border-radius: 0px;
+    padding: 0px;
+
+  }
+
+  .wrapper {
+    box-shadow: none;
+    border-radius: 0px;
+    padding: 0px;
+    gap: 10px
+  }
+
+  .option {
+    margin-top: 10px;
+  }
+
+
+}
+
+@media screen and (max-width: 600px)  {
+  .wrapper{
+    box-shadow: none;
+    border-radius: 0px;
+    padding: 0px;
+    
+  }
+  
+}
