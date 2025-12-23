@@ -79,7 +79,7 @@ main {
 .author-image {
   width: clamp(10px, 20vw, 40px);
   height: clamp(10px, 20vw, 40px);
-  border-radius: 50%;  
+  border-radius: 50%;
   object-fit: cover;
 }
 
@@ -104,12 +104,12 @@ main {
   gap: 2px;
 }
 
-.post-date{
+.post-date {
   font-size: clamp(10px, 3.0vw, 16px);
   color: rgba(0, 0, 0, 0.534);
 }
 
-.post-form{
+.post-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -119,7 +119,7 @@ main {
 
 
 
-#post-text{
+#post-text {
   resize: none;
   padding: 10px;
   border-radius: 5px;
@@ -134,16 +134,17 @@ main {
 
 }
 
-#post-text:focus{
+#post-text:focus {
   box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.75);
   outline: 1px solid rgb(0, 0, 0);
 
 }
 
-#post-btn{
+#post-btn {
   opacity: 0;
+  max-height: 0;
   transform: translateY(10px);
-  padding: 10px;
+  padding: 0px;
   border-radius: 5px;
   border: none;
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.75);
@@ -157,17 +158,19 @@ main {
   transition: opacity .25s ease, transform .25s ease;
 }
 
-.post-btn-wrapper.show #post-btn{
+.post-btn-wrapper.show #post-btn {
+  max-height: 100%;
   opacity: 1;
   transform: translateY(0);
+  padding: 10px;
 }
 
-.post-btn-wrapper.show{
+.post-btn-wrapper.show {
   max-height: 100px;
   transition: transform 0.2s ease;
 }
 
-.post-btn-wrapper.show:hover #post-btn{
+.post-btn-wrapper.show:hover #post-btn {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
   box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.75);
@@ -181,14 +184,16 @@ main {
 
 }
 
-.post-btn-wrapper{
+.post-btn-wrapper {
   max-height: 0;
   transform: translateY(5px);
   border-radius: 5px;
   transition: max-height .25s ease;
+
 }
 
-.add-btn{
+.add-btn {
+  opacity: 1;
   font-size: clamp(10px, 5.0vw, 20px);
   background-color: transparent;
   border-radius: 50%;
@@ -199,12 +204,51 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: opacity .25s ease, transform .25s ease;
 }
 
-.add-btn:hover{
-  background: radial-gradient( ellipse 65% 65% at 50% 50%, rgba(241, 124, 235, 0.295) 0%, transparent 80%);
+.add-btn:hover {
+  background: radial-gradient(ellipse 65% 65% at 50% 50%, rgba(241, 124, 235, 0.295) 0%, transparent 80%);
   transform: scale(1.3);
 }
+
+.add-btn.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: rotateZ(45deg);
+}
+
+
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap:0px;
+  font-size: clamp(10px, 3.0vw, 16px);
+  color: rgba(0, 0, 0, 0.534);
+  transition: opacity .25s ease, transform .25s ease;
+  opacity: 1;
+
+}
+
+.undo-btn {
+  font-size: clamp(10px, 2.8vw, 16px);
+  color: rgba(0, 0, 0, 0.534);
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.undo-btn:hover {
+  text-decoration: underline;
+}
+
+.info.anim {
+  opacity: 1;
+}
+
+
 
 
 .post-content {
@@ -285,10 +329,10 @@ main {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  
+
 }
 
-.interactions-btn:hover{
+.interactions-btn:hover {
   transform: scale(1.3);
 }
 
@@ -296,18 +340,36 @@ main {
   transition: background 0.2s ease-in-out;
 }
 
-.interactions-btn[data-liked = "true"]{
-
-  box-shadow: 0px 0px 1px 1px rgb(255, 174, 0) inset,
-  0px 0px 1px 1px rgb(255, 174, 0);
+.yellow-reaction-btn.liked {
   border-radius: 40%;
- 
+  box-shadow: 0px 0px 1px 1px rgb(255, 174, 0) inset,
+    0px 0px 1px 1px rgb(255, 174, 0);
 }
 
-.like-count[data-liked = "true"]{
+
+.yellow-reaction-count.liked {
   color: rgb(255, 174, 0);
 }
 
+.heart-btn.liked {
+  border-radius: 40%;
+  box-shadow: 0px 0px 1px 1px rgb(255, 0, 0) inset,
+    0px 0px 1px 1px rgb(255, 0, 0);
+}
+
+
+.heart-count.liked {
+  color: rgb(255, 0, 0);
+}
+
+.reactions-number {
+  font-weight: bold;
+}
+
+.reactions-number.liked{
+  color: rgb(255, 0, 0);
+  font-weight: bold;
+}
 
 .reaction-btn:hover {
   background:
@@ -324,10 +386,24 @@ main {
     radial-gradient(ellipse 65% 65% at 50% 50%, rgba(255, 0, 106, 0.726) 0%, transparent 80%);
 }
 
+.saved{
+  border-radius: 40%;
+  box-shadow: 0px 0px 1px 1px rgb(255, 0, 0) inset,
+    0px 0px 1px 1px rgb(255, 0, 0);
+  
+  background:
+    radial-gradient(ellipse 65% 65% at 50% 50%, rgba(255, 100, 165, 0.726) 0%, transparent 100%);
+}
+
+.save-btn.saved:hover {
+  background:
+    radial-gradient(ellipse 65% 65% at 50% 50%, rgba(255, 0, 106, 0.726) 0%, transparent 100%);
+}
+
 .comment-btn:hover {
   background:
     radial-gradient(ellipse 65% 65% at 50% 50%, rgba(145, 145, 145, 0.726) 0%, transparent 80%);
-  
+
 }
 
 
@@ -337,8 +413,8 @@ main {
   gap: 5px;
 }
 
-.more-comments-btn{
-  margin-bottom: 5px ;
+.more-comments-btn {
+  margin-bottom: 5px;
 }
 
 
@@ -354,7 +430,7 @@ h1 {
 
 }
 
-.posts{
+.posts {
 
   display: flex;
   flex-direction: column;
@@ -362,10 +438,10 @@ h1 {
 }
 
 
-.comments{
+.comments {
   padding: 0px;
   background-color: rgb(240, 238, 238);
-  display: flex ;
+  display: flex;
   flex-direction: column;
   gap: 5px;
   border-radius: 10px;
@@ -377,26 +453,26 @@ h1 {
 
 
 
-.comments.active{
+.comments.active {
   padding: 0px;
   opacity: 1;
   transform: translateY(0);
 
 }
 
-.comments-replies{
+.comments-replies {
   align-items: flex-end;
   padding: 0px;
   gap: 5px;
   display: none;
-  
+
 }
 
-.comments-replies.active{
+.comments-replies.active {
   display: flex;
 }
 
-.comment-container{
+.comment-container {
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -405,19 +481,19 @@ h1 {
 
 
 
-.comment-reply{
+.comment-reply {
   width: 95%;
   background-color: transparent;
 }
 
-.comment{
+.comment {
 
   background-color: rgba(212, 212, 212, 0.521);
 
- 
+
   padding: 10px;
   border-radius: 5px;
- 
+
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: start;
@@ -425,15 +501,15 @@ h1 {
 
 }
 
-.comment-author-image{
+.comment-author-image {
 
   width: clamp(8px, 14vw, 40px);
   height: clamp(8px, 14vw, 40px);
-  border-radius: 50%;  
+  border-radius: 50%;
   object-fit: cover;
 }
 
-.comment-content{
+.comment-content {
   max-width: 100%;
 
   flex-wrap: wrap;
@@ -442,23 +518,27 @@ h1 {
 
 
 
-.comment-date{
+.comment-date {
   font-size: clamp(10px, 4vw, 13px);
   color: rgba(0, 0, 0, 0.534);
 }
 
-.comment-author-name{
+.comment-author-name {
   font-size: clamp(10px, 4.8vw, 20px);
 }
 
-.heart-comment-btn{
+.heart-comment-btn {
   background-color: transparent;
   border: none;
   cursor: pointer;
   font-size: clamp(10px, 5.0vw, 15px);
 }
 
-.comment-hearts-wrapper{
+.heart-comment-btn:hover {
+  transform: scale(1.1);
+}
+
+.comment-hearts-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -467,12 +547,12 @@ h1 {
   gap: 4px;
 }
 
-.reactions-number{
+.reactions-number {
   font-size: clamp(10px, 3.0vw, 14px);
   color: rgba(0, 0, 0, 0.534);
 }
 
-#comment-text{
+#comment-text {
   resize: none;
   padding: 10px;
   border-radius: 5px;
@@ -488,18 +568,20 @@ h1 {
 
 }
 
-#comment-text:focus{
+#comment-text:focus {
   outline: 1px solid rgba(0, 0, 0, 0.2);
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.75);
 }
 
-.comment-form{
+.comment-form {
   position: sticky;
   top: 0;
-  background-color: rgb(255, 255, 255); /*moze zmienię w przyszłości*/
+  z-index: 1;
+  background-color: rgb(255, 255, 255);
+  /*moze zmienię w przyszłości*/
 }
 
-.see-more-btn{
+.see-more-btn {
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -510,22 +592,22 @@ h1 {
   gap: 5px;
   justify-content: center;
   align-self: center;
-  
+
 
 }
 
-.btn-icon{
-  width:  clamp(10px, 5.0vw, 15px);
+.btn-icon {
+  width: clamp(10px, 5.0vw, 15px);
   height: clamp(10px, 5.0vw, 15px);
   color: rgba(0, 0, 0, 0.534);
 }
 
 
-.see-more-btn:hover{
+.see-more-btn:hover {
   text-decoration: underline;
 }
 
-.reply-btn{
+.reply-btn {
   background-color: transparent;
   border: none;
   cursor: pointer;
@@ -533,29 +615,30 @@ h1 {
   color: rgba(0, 0, 0, 0.534);
 }
 
-.comment-bottom-wrapper{
+.comment-bottom-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-#comment-text{
+#comment-text {
   box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
 }
 
 @media screen and (max-width: 684px) {
-  main{
+  main {
     padding: 10px 0;
     gap: 5px;
+  
   }
 
-  .post{
+  .post {
     box-shadow: none;
     border-radius: 0;
     border: 1px solid rgba(0, 0, 0, 0.2);
   }
 
-  #post-text{
+  #post-text {
     box-shadow: none;
     border: 1px solid rgba(0, 0, 0, 0.048);
     border-radius: 0px;
@@ -563,24 +646,28 @@ h1 {
 
   }
 
-  #post-text:focus{
+  #post-text:focus {
     border-radius: 0px;
     outline: none;
     box-shadow: none;
   }
 
-  .post-btn-wrapper{
+  .post-btn-wrapper {
     width: 90%;
     margin: 0 auto;
   }
 
-  .comments{
+  .comments {
     padding: 0px;
   }
 
-  .comments.active{
+  .comments.active {
     padding: 0px;
 
+  }
+
+  .posts{
+    margin-top: 10px;
   }
 
 
@@ -593,6 +680,8 @@ h1 {
   .interaction-wrapper {
     flex-direction: column;
   }
+
+
 
 
 
@@ -636,10 +725,15 @@ h1 {
     flex-direction: row;
   }
 
-  .comment{
+  .comment {
     gap: 2px;
     padding: 2px;
 
+  }
+  .post-header {
+    flex-direction: column;
+    justify-items: flex-start;
+    gap: 5px;
   }
 
 
@@ -652,7 +746,12 @@ h1 {
     padding: 5px;
     border-radius: 0;
     border: none;
+    outline: 1px solid rgba(0, 0, 0, 0.2);
 
+  }
+
+  .posts {
+    gap: 5px;
   }
 
 
