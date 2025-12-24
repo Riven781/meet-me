@@ -80,11 +80,9 @@ main {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 200px;
   padding: 10px;
-  position: absolute;
-  top: 100%;
-  left: calc(5% + clamp(80px, 15.0vw, 150px)) ;
+  margin-left:  calc(5% + clamp(80px, 15.0vw, 150px)) ;
+
   transform: translate(0, 0);
 
 
@@ -99,10 +97,17 @@ main {
   }
 
   .profile-data{
-    top: calc(100% + clamp(80px, 15.0vw, 150px));
-    left: 50%;
 
-    transform: translate(-50%, 0);
+    margin-top: calc( clamp(80px, 15.0vw, 150px));
+    margin-left: 0;
+
+    align-items: center;
+
+
+ 
+  
+
+ 
 
   }
   
