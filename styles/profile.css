@@ -15,15 +15,27 @@ body {
   display: grid;
   grid-template-areas:
     "header"
+    "account-header"
     "main"
     "footer";
-  grid-template-rows:auto 1fr auto;
+  grid-template-rows:auto auto 1fr auto;
   grid-template-columns: 1fr;
   background-color: rgb(255, 255, 255);
 }
 
-main {
+.account-header{
   max-width: 1200px;
+  margin: 0 auto;
+  grid-area: account-header;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 0px;
+}
+
+main {
+  max-width: 600px;
   margin: 0 auto;
   grid-area: main;
   display: flex;
@@ -31,9 +43,12 @@ main {
   gap: 10px;
   width: 100%;
   padding: 0px;
+  margin-top: 20px;
   
   
 }
+
+
 
 .profile-information{
   display: flex ;
@@ -43,6 +58,7 @@ main {
   width: 100%;
 
   border-radius: 5px;
+  padding-bottom: 30px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
   position: relative;
 
@@ -60,7 +76,7 @@ main {
   border-radius: 5px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
   position: relative;
-  background-color: aqua;
+  background-color: rgba(136, 136, 136, 0.959);
 }
 
 .author-image-large{
@@ -76,14 +92,40 @@ main {
 
 }
 
+.profile-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 8px;
+  padding: 10px;
+  margin-left:  calc(5% + clamp(80px, 15.0vw, 150px)) ;
+}
+
 .profile-data{
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-  margin-left:  calc(5% + clamp(80px, 15.0vw, 150px)) ;
+  gap: 8px;  
+}
 
-  transform: translate(0, 0);
+.follow-btn{
+
+  font-size:  clamp(10px, 2.8vw, 16px);
+  color: rgb(255, 255, 255);
+  border: none;
+  background-color: rgb(136, 0, 0);
+  padding: 10px;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+
+
+.followers{
+  font-size:  clamp(10px, 2.8vw, 16px);
+  color: rgba(0, 0, 0, 0.534);
+  border: none;
+  background-color: transparent;
 
 
 }
@@ -96,19 +138,19 @@ main {
     left: 50%;
   }
 
-  .profile-data{
+  .profile-header{
 
     margin-top: calc( clamp(80px, 15.0vw, 150px));
     margin-left: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .profile-data{
 
     align-items: center;
-
-
- 
-  
-
- 
-
+    justify-content: center;
   }
   
 

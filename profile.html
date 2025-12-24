@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles/main.css" type="text/css">
   <link rel="stylesheet" href="styles/profile.css" type="text/css">
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 
   <title>Document</title>
 </head>
+
 <body>
- <header>
+  <header>
     <div class="logo">
       <h1>
         MEET ME
@@ -26,18 +28,47 @@
 
   </header>
 
-  <main>
+  <div class="account-header">
     <section class="profile-information">
       <div class="profile-background">
         <img class="author-image-large" src="images/default-avatar.jpg" alt="image">
       </div>
+      <div class="profile-header">
 
-      <div class="profile-data">
-        <h2 class="author-name">
-          John Doe
-        </h2>
-       
+
+        <div class="profile-data">
+          <h2 class="author-name">
+            John Doe
+          </h2>
+          <h3 class="followers">
+            <span class="followers-number">43k followers</span> • <span class="following-number">100k following</span>
+          </h3>
+        </div>
+        <button class="follow-btn">
+          Follow
+        </button>
       </div>
+    </section>
+  </div>
+
+  </div>
+
+  <main>
+
+
+    <section class="create-post">
+      <form class="post-form">
+        <textarea id="post-text" rows="4" placeholder="What's on your mind ?"></textarea>
+        <div class="post-btn-wrapper">
+          <button type="submit" id="post-btn">Post</button>
+        </div>
+
+      </form>
+    </section>
+
+
+    <section class="posts">
+
     </section>
 
   </main>
@@ -47,9 +78,10 @@
   </footer>
 
 
-  
+
 </body>
 <script src="scripts/profile.js"></script>
+<script src="scripts/main.js"></script>
 
 
 </html>
