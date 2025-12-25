@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/start.css" type="text/css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+
+  <title>Document</title>
+</head>
+<body>
+  <main>
+    <div class="wrapper">
+    <section class="logo">
+      <h1>
+        MEET ME
+      </h1>
+    </section>
+    <form class="login-form">
+      <div class="inputs">
+        <div class="field login">
+          <label id="login-label" for="login-input">Username or email</label>
+          <input type="text" placeholder="Username or email" id="login-input"  required>
+        </div>
+
+        <div class="field register hide">
+          <label id="email-label" for="username-input">Email</label>
+          <input type="text" placeholder="Email" id="email-input"  required>
+        </div>
+
+        <div class="field register hide">
+          <label id="first-name-label" for="first-name-input">First name</label>
+          <input type="text" placeholder="First name" id="first-name-input"  required>
+        </div>
+
+        <div class="field register hide">
+          <label id="last-name-label" for="last-name-input">Last name</label>
+          <input type="text" placeholder="Last name" id="last-name-input"  required>
+        </div>
+
+        <div class="field register hide">
+          <label id="username-label" for="username-input">Username</label>
+          <input type="text" placeholder="Username" id="username-input"  required>
+        </div>
+
+        <div class="field">
+          <label id="password-label" for="password-input">Password</label>
+          <input type="password" placeholder="Password" id="password-input" required>
+        </div>
+  
+        
+      </div>
+
+      <button type="submit" class="submit-btn login" id="login-btn">Login</button>
+
+      <button type="submit" class="submit-btn register hide" id="register-btn">Register</button>
+    </form>
+    <section id="register-option" class="option login">
+      <p>
+        Don't have an account? <button id="register-option-btn" class="option-btn">Sign up</button>
+      </p>
+    </section>
+
+    <section id="login-option" class="option register hide">
+      <p>
+        Already have an account? <button id="login-option-btn" class="option-btn">Sign in</button>
+      </p>
+    </section>
+    </div>
+  </main>
+  
+</body>
+<script src="/scripts/start.js" defer></script>
+</html>

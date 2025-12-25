@@ -1,0 +1,32 @@
+[
+  {
+    "id": 4,
+    "authorName" : "John Doe",
+    "authorImage" : "/images/default-avatar.jpg",
+    "createdAt": "2025",
+    "commentText" : "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?",
+    "commentHearts" : 10,
+    "commentReplies" : 3,
+    "isLiked" : true
+  },
+  {
+    "id": 5,
+    "authorName" : "Anna Boe",
+    "authorImage" : "/images/default-avatar.jpg",
+    "createdAt": "202",
+    "commentText" : "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?",
+    "commentHearts" : 0,
+    "commentReplies" : 0,
+    "isLiked" : false
+  },
+  {
+    "id": 6,
+    "authorName" : "John Doe",
+    "authorImage" : "/images/default-avatar.jpg",
+    "createdAt": "2025",
+    "commentText" : "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quas, voluptate?",
+    "commentHearts" : 10,
+    "commentReplies" : 0,
+    "isLiked" : true
+  }
+]
