@@ -6,13 +6,59 @@ const maxHeight = 300;
 
 postBtn.parentElement.classList.toggle('show', textarea.value.trim() !== '');
 
+async function publishPost( text) {
+  const response = await fetch('/api/createPost', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ text })
+  })
+
+  const data = await response.json();
+  return {
+    ok: response.ok,
+    status: response.status,
+    data
+  };
+}
+
+postBtn.addEventListener('click',async (e) => {
+  console.log('click');
+  e.preventDefault();
+  const text = textarea.value;
+  console.log(text);
+  const result = await publishPost(text);
+
+  if(result.ok) {
+    textarea.value = '';
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
+    postBtn.parentElement.classList.toggle('show', textarea.value.trim() !== '');
+    //loadPosts(); //TODO załaduj ten post po stworzeniu albo jeszcze lepiej zwróć go z createPost
+
+    const container = document.querySelector('.posts');
+    console.log(result);
+    console.log(result.data);
+    console.log(result.data.postData);
+
+
+    appModel.posts.push(result.data.postData);
+    appModel.postsById[result.data.postData.id] = result.data.postData;
+    
+
+    container.insertBefore(createPost(result.data.postData), container.firstChild);
+
+    console.log('tu');
+  }
+
+});
+
 textarea.addEventListener('input', () => {
   textarea.style.height = 'auto';
   textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
 
   postBtn.parentElement.classList.toggle('show', textarea.value.trim() !== '');
-
-
 
 });
 

@@ -1,4 +1,4 @@
-import { createUser, getUserByEmailAndPassword, getUserByUsernameAndPassword} from '../repository/users.js'
+import { createUser, getPostById, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertPost} from '../repository/users.js'
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -12,6 +12,7 @@ export async function registerUser(user) {
 
   try {
     const userId = await createUser(user);
+    console.log(`userId: ${userId}`);
     return {
       ok: true,
       userId
@@ -59,12 +60,80 @@ export async function loginUser(userData) {
     console.error(error);
     return {
       ok: false,
-      code: "USER_NOT_FOUND --",
+      code: "USER_NOT_FOUND_ERROR",
       errors: {
         usernameOrEmail: "User not found"
       }
     }
   }
+}
+
+export async function createPost(userId, text) {
+  let postId;
+  try{
+    postId = await insertPost({user_id: userId, text});
+    console.log(` postId: ${postId}`);
+    if (!postId){
+      return {
+        ok: false,
+        code: "POST_NOT_CREATED",
+        errors: {
+          text: "Post not created"
+        }
+      }
+    }
+
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "POST_NOT_CREATED_ERROR",
+      errors: {
+        text: "Post not created"
+      }
+    }
+  }
+
+
+  try{
+    const postData = await getPostById(postId);
+
+    if (postData){
+      return {
+        ok: true,
+        postId,
+        postData : {
+          id: postData.id,
+          authorName : postData.username,
+          createdAt : postData.created_at,
+          postText : postData.text,
+          postHearts : postData.heart_count,
+          postLikes : postData.like_count,
+          postDislikes : postData.dislike_count,
+          postComments : postData.reply_count,
+          observed : false,
+          saved : false,
+          liked: 0,
+          authorImage : "/avatars/default-avatar.jpg",
+        },
+        code: "POST_CREATED"
+      }
+    }
+    else{
+      return {
+        ok: true,
+        code: "POST_CREATED_BUT_NOT_FOUND",
+        
+      }
+    }
+  } catch (error) {
+    return {
+      ok: true,
+      code: "POST_CREATED_BUT_NOT_FOUND",
+      
+    };
+  }
+  
 }
 
 

@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser } from './service/users.js';
+import { loginUser, registerUser, createPost } from './service/users.js';
 import session from 'express-session';
 
 
@@ -87,10 +87,34 @@ app.post('/api/login', async (req, res) => {
   try{
     const result = await loginUser(req.body);
     if (result.ok) {
-      req.session.userId = result.userId;
-      res.status(200).json(result);
+      req.session.regenerate((err) => {  //usunie id starej sesji przy nowym zalogowaniu
+        if (err) {
+          console.error(err);
+          res.status(500).json({ code: "SESSION_ERROR" });
+        }
+        req.session.userId = result.userId;
+        res.status(200).json({
+          ok: true
+        });
+      });
+      
+      
     } else {
       res.status(401).json(result);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+})
+
+app.post('/api/createPost', requireAuth, async (req, res) => {
+  try{
+    const result = await createPost(req.session.userId, req.body.text);
+    if (result.ok) {
+      res.status(200).json(result);
+    } else {
+      res.status(400).json(result);
     }
   } catch (error) {
     console.error(error);

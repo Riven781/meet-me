@@ -46,15 +46,16 @@ const lastNameLabel = document.getElementById('last-name-label');
 const usernameInput = document.getElementById('username-input');
 const usernameLabel = document.getElementById('username-label');
 
-let userNameOrEmail = '';
-let password = '';
-let email = '';
-let firstName = '';
-let lastName = '';
-let username = '';
+window.addEventListener('load', () => {
+  const fields = document.querySelectorAll('.field');
+  fields.forEach(field => {
+    if (field.children[1].value !== '') {
+      field.children[1].style.padding = '0 5px 2px 5px';
+      field.children[1].placeholder = '';
+      field.children[0].style.display = 'inline';
+    }
 
-loginInput.addEventListener('input', (e) => {
-  userNameOrEmail = e.target.value;
+  });
 });
 
 loginInput.addEventListener('focus', () => {
@@ -67,16 +68,14 @@ loginInput.addEventListener('focus', () => {
 loginInput.addEventListener('blur', () => {
   loginInput.placeholder = 'Username or email';
   
-  if (userNameOrEmail === '') {
+  if (loginInput.value === '') {
     loginLabel.style.display = 'none';
     loginInput.style.padding = '5px';
     
   }
 });
 
-passwordInput.addEventListener('input', (e) => {
-  password = e.target.value;
-});
+
 
 passwordInput.addEventListener('focus', () => {
   passwordInput.style.padding = '0 5px 2px 5px';
@@ -86,15 +85,13 @@ passwordInput.addEventListener('focus', () => {
 
 passwordInput.addEventListener('blur', () => {
   passwordInput.placeholder = 'Password';
-  if (password === '') {
+  if (passwordInput.value === '') {
     passwordLabel.style.display = 'none';
     passwordInput.style.padding = '5px';
   }
 });
 
-emailInput.addEventListener('input', (e) => {
-  email = e.target.value;
-});
+
 
 emailInput.addEventListener('focus', () => {
   emailInput.style.padding = '0 5px 2px 5px';
@@ -104,15 +101,13 @@ emailInput.addEventListener('focus', () => {
 
 emailInput.addEventListener('blur', () => {
   emailInput.placeholder = 'Email';
-  if (email === '') {
+  if (emailInput.value === '') {
     emailLabel.style.display = 'none';
     emailInput.style.padding = '5px';
   }
 });
 
-firstNameInput.addEventListener('input', (e) => {
-  firstName = e.target.value;
-});
+
 
 firstNameInput.addEventListener('focus', () => {
   firstNameInput.style.padding = '0 5px 2px 5px';
@@ -122,16 +117,14 @@ firstNameInput.addEventListener('focus', () => {
 
 firstNameInput.addEventListener('blur', () => {
   firstNameInput.placeholder = 'First name';
-  if (firstName === '') {
+  if (firstNameInput.value === '') {
     firstNameLabel.style.display = 'none';
     firstNameInput.style.padding = '5px';
   }
 });
 
 
-lastNameInput.addEventListener('input', (e) => {
-  lastName = e.target.value;
-});
+
 
 lastNameInput.addEventListener('focus', () => {
   lastNameInput.style.padding = '0 5px 2px 5px';
@@ -141,15 +134,13 @@ lastNameInput.addEventListener('focus', () => {
 
 lastNameInput.addEventListener('blur', () => {
   lastNameInput.placeholder = 'Last name';
-  if (lastName === '') {
+  if (lastNameInput.value === '') {
     lastNameLabel.style.display = 'none';
     lastNameInput.style.padding = '5px';
   }
 });
 
-usernameInput.addEventListener('input', (e) => {
-  username = e.target.value;
-});
+
 
 usernameInput.addEventListener('focus', () => {
   usernameInput.style.padding = '0 5px 2px 5px';
@@ -159,7 +150,7 @@ usernameInput.addEventListener('focus', () => {
 
 usernameInput.addEventListener('blur', () => {
   usernameInput.placeholder = 'Username';
-  if (username === '') {
+  if (usernameInput.value === '') {
     usernameLabel.style.display = 'none';
     usernameInput.style.padding = '5px';
   }
@@ -188,13 +179,13 @@ async function registerUser(userData){
 }
 
 
-async function loginUser(userNameOrEmail, password){
+async function loginUser(usernameOrEmail, password){
   const res = await fetch('api/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({usernameOrEmail: userNameOrEmail, password})
+    body: JSON.stringify({usernameOrEmail, password})
   });
 
   const data = await res.json();
@@ -209,16 +200,11 @@ async function loginUser(userNameOrEmail, password){
 
 async function onLoginSubmit(e){
   e.preventDefault();
-  const result = await loginUser(userNameOrEmail, password);
+  const usernameOrEmail = loginInput.value;
+  const password = passwordInput.value;
+  const result = await loginUser(usernameOrEmail, password);
   
   if (result.ok) {
-    userNameOrEmail = '';
-    password = '';
-    email = '';
-    firstName = '';
-    lastName = '';
-    username = '';
-
     loginInput.value = '';
     passwordInput.value = '';
     emailInput.value = '';
@@ -237,6 +223,11 @@ async function onLoginSubmit(e){
 
 async function onRegisterSubmit(e){
   e.preventDefault();
+  const username = usernameInput.value;
+  const email = emailInput.value;
+  const firstName = firstNameInput.value;
+  const lastName = lastNameInput.value;
+  const password = passwordInput.value;
   const result = await registerUser({username, email, password, first_name: firstName, last_name: lastName});
   
   if (result.ok) {
@@ -244,21 +235,13 @@ async function onRegisterSubmit(e){
 
     loginElements.forEach(el => el.classList.remove('hide'));
     registerElements.forEach(el => el.classList.add('hide'));
-
+    loginInput.value = username;
     emailInput.value = '';
     firstNameInput.value = '';
     lastNameInput.value = '';
     usernameInput.value = '';
     passwordInput.value = '';
 
-    
-    userNameOrEmail = username;
-    loginInput.value = userNameOrEmail;
-    email = '';
-    firstName = '';
-    lastName = '';
-    username = '';
-    password = '';
 
     
     console.log("okkkk");
@@ -270,7 +253,7 @@ async function onRegisterSubmit(e){
   }
 }
 
-
+//czytaj wartosci przy kliknieciu przycisku
 
 const registerButton = document.getElementById('register-btn');
 registerButton.addEventListener('click', onRegisterSubmit);
