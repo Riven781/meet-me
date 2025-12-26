@@ -1,4 +1,4 @@
-import { createUser } from '../repository/users.js'
+import { createUser, getUserByEmailAndPassword, getUserByUsernameAndPassword} from '../repository/users.js'
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -30,7 +30,41 @@ export async function registerUser(user) {
     }
     throw error;
   }
+}
 
+export async function loginUser(userData) {
+  const { usernameOrEmail, password } = userData;
+  try {
+    let user;
+    if (usernameOrEmail.includes('@')) {
+      user = await getUserByEmailAndPassword(usernameOrEmail, password);
+    } else {
+      user = await getUserByUsernameAndPassword(usernameOrEmail, password);
+    }
+    if (!user){
+      return {
+        ok: false,
+        code: "USER_NOT_FOUND",
+        errors: {
+          usernameOrEmail: "User not found"
+        }
+      }
+    } else{
+      return {
+        ok: true,
+        userId: user.id
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "USER_NOT_FOUND --",
+      errors: {
+        usernameOrEmail: "User not found"
+      }
+    }
+  }
 }
 
 

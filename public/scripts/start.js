@@ -28,7 +28,7 @@ loginOptionBtn.addEventListener('click', () => {
 });
 
 
-const userNameInput = document.getElementById('login-input');
+const loginInput = document.getElementById('login-input');
 const loginLabel = document.getElementById('login-label');
 
 const passwordInput = document.getElementById('password-input');
@@ -53,23 +53,23 @@ let firstName = '';
 let lastName = '';
 let username = '';
 
-userNameInput.addEventListener('input', (e) => {
+loginInput.addEventListener('input', (e) => {
   userNameOrEmail = e.target.value;
 });
 
-userNameInput.addEventListener('focus', () => {
-  userNameInput.style.padding = '0 5px 2px 5px';
-  userNameInput.placeholder = '';
+loginInput.addEventListener('focus', () => {
+  loginInput.style.padding = '0 5px 2px 5px';
+  loginInput.placeholder = '';
   loginLabel.style.display = 'inline';
 });
 
 
-userNameInput.addEventListener('blur', () => {
-  userNameInput.placeholder = 'Username or email';
+loginInput.addEventListener('blur', () => {
+  loginInput.placeholder = 'Username or email';
   
   if (userNameOrEmail === '') {
     loginLabel.style.display = 'none';
-    userNameInput.style.padding = '5px';
+    loginInput.style.padding = '5px';
     
   }
 });
@@ -188,12 +188,80 @@ async function registerUser(userData){
 }
 
 
+async function loginUser(userNameOrEmail, password){
+  const res = await fetch('api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({usernameOrEmail: userNameOrEmail, password})
+  });
+
+  const data = await res.json();
+
+  return {
+    ok : res.ok,
+    status: res.status,
+    data
+  }
+}
+
+
+async function onLoginSubmit(e){
+  e.preventDefault();
+  const result = await loginUser(userNameOrEmail, password);
+  
+  if (result.ok) {
+    userNameOrEmail = '';
+    password = '';
+    email = '';
+    firstName = '';
+    lastName = '';
+    username = '';
+
+    loginInput.value = '';
+    passwordInput.value = '';
+    emailInput.value = '';
+    firstNameInput.value = '';
+    lastNameInput.value = '';
+    usernameInput.value = '';
+
+    window.location.href = '/meet-me/posts';
+  }
+  else{
+    console.log("error");
+    console.log(result);
+  }
+}
+
+
 async function onRegisterSubmit(e){
   e.preventDefault();
   const result = await registerUser({username, email, password, first_name: firstName, last_name: lastName});
   
   if (result.ok) {
-    console.log("ok");
+    wStatus = LOGIN_STATUS;
+
+    loginElements.forEach(el => el.classList.remove('hide'));
+    registerElements.forEach(el => el.classList.add('hide'));
+
+    emailInput.value = '';
+    firstNameInput.value = '';
+    lastNameInput.value = '';
+    usernameInput.value = '';
+    passwordInput.value = '';
+
+    
+    userNameOrEmail = username;
+    loginInput.value = userNameOrEmail;
+    email = '';
+    firstName = '';
+    lastName = '';
+    username = '';
+    password = '';
+
+    
+    console.log("okkkk");
     console.log(result);
   }
   else{
@@ -206,3 +274,6 @@ async function onRegisterSubmit(e){
 
 const registerButton = document.getElementById('register-btn');
 registerButton.addEventListener('click', onRegisterSubmit);
+
+const loginButton = document.getElementById('login-btn');
+loginButton.addEventListener('click', onLoginSubmit);
