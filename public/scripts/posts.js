@@ -159,6 +159,8 @@ function renderNewPosts(posts) {
 
 
 loadPosts();
+window.scrollTo(0, 0);
+
 
 const postEnd = document.getElementById('feed-end');
 
@@ -746,8 +748,8 @@ document.querySelector('.posts').addEventListener('click', (e) => {
   if (e.target.matches(".like-btn")) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
-    
-    likePost(postId, postEl);
+    likePostServerCall(postId, postEl);
+    //likePost(postId, postEl);
   }
 
 
@@ -755,14 +757,16 @@ document.querySelector('.posts').addEventListener('click', (e) => {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
   
-    heartPost(postId, postEl);
+    //heartPost(postId, postEl);
+    heartPostServerCall(postId, postEl);
   }
 
   if (e.target.matches(".dislike-btn")) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
    
-    dislikePost(postId, postEl);
+    //dislikePost(postId, postEl);
+    dislikePostServerCall(postId, postEl);
   }
 
   if (e.target.matches(".add-btn")){
@@ -885,6 +889,122 @@ function setClassesForReactionButtons(elementsToAddClass, elementsToRemoveClass)
     elementsToRemoveClass.counter.textContent = elementsToRemoveClass.newCounter;
   }
 
+}
+
+async function likePostServerCall(postId, postEl) {
+  const previousReaction = appModel.postsById[postId].liked;
+  const reactionType = appModel.postsById[postId].liked == 2 ? 0 : 2; //to chcemy ustawić 
+  likePost(postId, postEl);
+  
+  const response = await fetch('/api/reaction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ postId, reactionType })
+  })
+
+
+
+  const data = await response.json();
+
+  if (!response.ok){
+    if (previousReaction != appModel.postsById[postId].liked){
+      if (previousReaction == 0 || previousReaction == 2){
+        likePost(postId, postEl);
+      }
+      else if (previousReaction == 1){
+        heartPost(postId, postEl);
+      }
+      else if (previousReaction == 3){
+        dislikePost(postId, postEl);
+      }
+    }
+  } else if (data.reaction !== appModel.postsById[postId].liked){
+    
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data
+  }
+}
+
+
+
+
+async function heartPostServerCall(postId, postEl) {
+  const previousReaction = appModel.postsById[postId].liked;
+  const reactionType = appModel.postsById[postId].liked == 1 ? 0 : 1;
+  heartPost(postId, postEl);
+  
+  const response = await fetch('/api/reaction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ postId, reactionType })
+  })
+
+  const data = await response.json();
+
+  if (!response.ok){
+    if (previousReaction != appModel.postsById[postId].liked){
+      if (previousReaction == 0 || previousReaction == 2){
+        likePost(postId, postEl);
+      }
+      else if (previousReaction == 1){
+        heartPost(postId, postEl);
+      }
+      else if (previousReaction == 3){
+        dislikePost(postId, postEl);
+      }
+    }
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data
+  }
+  
+}
+
+async function dislikePostServerCall(postId, postEl) {
+  const previousReaction = appModel.postsById[postId].liked;
+  const reactionType = appModel.postsById[postId].liked == 3 ? 0 : 3;
+  dislikePost(postId, postEl);
+  
+  const response = await fetch('/api/reaction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ postId, reactionType })
+  })
+
+  const data = await response.json();
+
+  if (!response.ok){
+    if (previousReaction != appModel.postsById[postId].liked){
+      if (previousReaction == 0 || previousReaction == 2){
+        likePost(postId, postEl);
+      }
+      else if (previousReaction == 1){
+        heartPost(postId, postEl);
+      }
+      else if (previousReaction == 3){
+        dislikePost(postId, postEl);
+      }
+    }
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    data
+  }
 }
 
 function likePost(postId, postEl) {

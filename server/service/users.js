@@ -1,5 +1,5 @@
 import e from 'express';
-import { createUser, getPostById, getPosts, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertPost} from '../repository/users.js'
+import { createUser, getPostById, getPosts, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertPost, setReaction } from '../repository/users.js'
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -43,7 +43,7 @@ export async function loginUser(userData) {
     } else {
       user = await getUserByUsernameAndPassword(usernameOrEmail, password);
     }
-    if (!user){
+    if (!user) {
       return {
         ok: false,
         code: "USER_NOT_FOUND",
@@ -51,7 +51,7 @@ export async function loginUser(userData) {
           usernameOrEmail: "User not found"
         }
       }
-    } else{
+    } else {
       return {
         ok: true,
         userId: user.id
@@ -71,10 +71,10 @@ export async function loginUser(userData) {
 
 export async function createPost(userId, text) {
   let postId;
-  try{
-    postId = await insertPost({user_id: userId, text});
+  try {
+    postId = await insertPost({ user_id: userId, text });
     console.log(` postId: ${postId}`);
-    if (!postId){
+    if (!postId) {
       return {
         ok: false,
         code: "POST_NOT_CREATED",
@@ -96,38 +96,38 @@ export async function createPost(userId, text) {
   }
 
 
-  try{
+  try {
     const postData = await getPostById(postId);
 
-    if (postData){
+    if (postData) {
       return {
         ok: true,
         postId,
-        postData : getPostData(postData, true),
+        postData: getPostData(postData, true),
         code: "POST_CREATED"
       }
     }
-    else{
+    else {
       return {
         ok: true,
         code: "POST_CREATED_BUT_NOT_FOUND",
-        
+
       }
     }
   } catch (error) {
     return {
       ok: true,
       code: "POST_CREATED_BUT_NOT_FOUND",
-      
+
     };
   }
-  
+
 }
 
 export async function getFeed(userId, limit = 20, lastPostCursor = null) {
-  try{
+  try {
     const data = await getPosts(userId, limit, lastPostCursor);
-    if (data.posts.length > 0){
+    if (data.posts.length > 0) {
       const formattedPosts = data.posts.map(post => getPostData(post, false));
       return {
         ok: true,
@@ -136,7 +136,7 @@ export async function getFeed(userId, limit = 20, lastPostCursor = null) {
         nextPostCursor: data.nextPostCursor
       }
     }
-    else{
+    else {
       return {
         ok: true,
         code: "NO_POSTS_FOUND",
@@ -156,24 +156,34 @@ export async function getFeed(userId, limit = 20, lastPostCursor = null) {
 
 }
 
+export async function setReactionToPost(userId, postId, reactionType) {
+  const reaction = await setReaction({ userId, postId, reactionType });
+  return {
+    ok: true,
+    code: "REACTION_SET",
+    reaction
+  }
+}
+
 
 
 
 function getPostData(post, isCreatedByUser) {
-  return{
+  return {
     id: post.id,
-    authorName : post.username,
-    createdAt : post.created_at,
-    postText : post.text,
-    postHearts : post.heart_count,
-    postLikes : post.like_count,
-    postDislikes : post.dislike_count,
-    postComments : post.reply_count,
-    observed : post.observed ?? false,
-    saved : post.saved ?? false,
+    authorName: post.username,
+    createdAt: post.created_at,
+    postText: post.text,
+    postHearts: post.heart_count,
+    postLikes: post.like_count,
+    postDislikes: post.dislike_count,
+    postComments: post.reply_count,
+    observed: post.observed ?? false,
+    saved: post.saved ?? false,
     liked: post.liked ?? 0,
-    authorImage : post.avatar_img_url ?? "/avatars/default-avatar.jpg",
-    isCreatedByUser: isCreatedByUser,           //czy jest to post autorski
+    authorImage: post.avatar_img_url ?? "/avatars/default-avatar.jpg",
+    isCreatedByUser: isCreatedByUser,           //czy jest to post autorski,
+    liked: post.reaction ?? 0
   }
 }
 

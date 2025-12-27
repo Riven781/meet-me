@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost } from './service/users.js';
 import session from 'express-session';
 
 
@@ -142,6 +142,22 @@ app.get("/api/getPosts", requireAuth, async (req, res) => {
     }
 
     res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+app.post('/api/reaction', requireAuth, async (req, res) => {
+  try{
+    const userId = req.session.userId;
+    const { postId, reactionType } = req.body;
+    const result = await setReactionToPost(userId, postId, reactionType);
+    if (result.ok) {
+      res.status(200).json(result);
+    } else {
+      res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
