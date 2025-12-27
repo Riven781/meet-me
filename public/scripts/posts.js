@@ -82,18 +82,67 @@ const appModel = {
 
 let posts = [];
 
+let nextPostCursor = null;
+let loading = false;
+let end = false;
+
+function isEndNearViewport() {
+  const rect = postEnd.getBoundingClientRect();
+  return rect.top <= window.innerHeight + 200;
+}
 
 async function loadPosts(lastId = null) {
-  const res = await fetch('./../data/posts.json');
-  const newPosts = await res.json();
-  appModel.posts.push(...newPosts);
-  newPosts.forEach(post => {
-    appModel.postsById[post.id] = post;
-  })
+  if (loading || end) return;
+  loading = true;
+  try{
+    const url = `/api/getPosts?limit=5${nextPostCursor ? `&lastPostCursor=${encodeURIComponent(nextPostCursor)}` : ''}`;
+
+    const res = await fetch(url,{
+      method: 'GET',
+      headers: {
+      },
+    }
+    );
+
+    console.log(res);
+
+    const data = await res.json();
+    console.log(data);
+    nextPostCursor = data.nextPostCursor;
+
+    console.log(` loaded nextPostCursor: ${nextPostCursor }`);
+    if (nextPostCursor){
+      console.log(` decoded: ${encodeURIComponent(nextPostCursor) }`);
+    }
+
+    if (!nextPostCursor){
+      end = true;
+    }
+
+    const newPosts = data.posts || [];
+
+    //const newPosts = await res.json();
+    appModel.posts.push(...newPosts);
+    newPosts.forEach(post => {
+      appModel.postsById[post.id] = post;
+    })
 
 
-  //TODO: sprawdzaj czy nie załadowano tego samego posta 
-  renderNewPosts(newPosts);
+    //TODO: sprawdzaj czy nie załadowano tego samego posta 
+    renderNewPosts(newPosts);
+
+    requestAnimationFrame(() => {
+      if (!end && isEndNearViewport()) {
+        console.log('loading more hoho');
+        loadPosts();
+      }
+    });
+
+  } catch (error){
+    console.error(error);
+  } finally {
+    loading = false;
+  }
 
 
 }
@@ -110,6 +159,22 @@ function renderNewPosts(posts) {
 
 
 loadPosts();
+
+const postEnd = document.getElementById('feed-end');
+
+const observer = new IntersectionObserver((entries) => {
+  const entry = entries[0];
+  console.log('observing');
+  console.log(entry.isIntersecting);
+  
+  if (entry.isIntersecting) loadPosts();
+}, { 
+  root: null, //sprawdza czy element jest widoczny w oknie przeglądarki
+  rootMargin: "200px",   //200px przed końcem strony pozwala na ładowanie nowych postów
+  threshold: 0.01 
+});
+
+observer.observe(postEnd);
 
 async function loadComments(postId, postEl, firstLoad) {
   let commentsByPostId = appModel.commentsByPostId[postId];
@@ -141,6 +206,8 @@ async function loadComments(postId, postEl, firstLoad) {
 
 
   renderNewComments(comments, postEl, firstLoad);
+
+
 
 }
 
@@ -954,3 +1021,5 @@ function dislikePost(postId, postEl) {
     );
   }
 }
+
+

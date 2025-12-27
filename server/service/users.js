@@ -1,4 +1,5 @@
-import { createUser, getPostById, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertPost} from '../repository/users.js'
+import e from 'express';
+import { createUser, getPostById, getPosts, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertPost} from '../repository/users.js'
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -102,20 +103,7 @@ export async function createPost(userId, text) {
       return {
         ok: true,
         postId,
-        postData : {
-          id: postData.id,
-          authorName : postData.username,
-          createdAt : postData.created_at,
-          postText : postData.text,
-          postHearts : postData.heart_count,
-          postLikes : postData.like_count,
-          postDislikes : postData.dislike_count,
-          postComments : postData.reply_count,
-          observed : false,
-          saved : false,
-          liked: 0,
-          authorImage : "/avatars/default-avatar.jpg",
-        },
+        postData : getPostData(postData, true),
         code: "POST_CREATED"
       }
     }
@@ -136,9 +124,58 @@ export async function createPost(userId, text) {
   
 }
 
+export async function getFeed(userId, limit = 20, lastPostCursor = null) {
+  try{
+    const data = await getPosts(userId, limit, lastPostCursor);
+    if (data.posts.length > 0){
+      const formattedPosts = data.posts.map(post => getPostData(post, false));
+      return {
+        ok: true,
+        posts: formattedPosts,
+        code: "POSTS_FOUND",
+        nextPostCursor: data.nextPostCursor
+      }
+    }
+    else{
+      return {
+        ok: true,
+        code: "NO_POSTS_FOUND",
+        posts: [],
+        nextPostCursor: null
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      code: "POSTS_NOT_FOUND_ERROR",
+      errors: {
+        text: "Posts not found"
+      }
+    }
+  }
+
+}
 
 
 
+
+function getPostData(post, isCreatedByUser) {
+  return{
+    id: post.id,
+    authorName : post.username,
+    createdAt : post.created_at,
+    postText : post.text,
+    postHearts : post.heart_count,
+    postLikes : post.like_count,
+    postDislikes : post.dislike_count,
+    postComments : post.reply_count,
+    observed : post.observed ?? false,
+    saved : post.saved ?? false,
+    liked: post.liked ?? 0,
+    authorImage : post.avatar_img_url ?? "/avatars/default-avatar.jpg",
+    isCreatedByUser: isCreatedByUser,           //czy jest to post autorski
+  }
+}
 
 
 

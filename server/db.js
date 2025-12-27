@@ -6,7 +6,8 @@ const db = mysql2.createPool({
   user: 'root',
   password: 'haslodobazy',
   database: 'WWWW25_WODCZYNSKI',
-  port: 3306
+  port: 3306,
+  dateStrings: true
 });
 
 export default db;

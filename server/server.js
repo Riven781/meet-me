@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed } from './service/users.js';
 import session from 'express-session';
 
 
@@ -120,10 +120,43 @@ app.post('/api/createPost', requireAuth, async (req, res) => {
     console.error(error);
     res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
   }
-})
+});
+
+app.get("/api/getPosts", requireAuth, async (req, res) => {
+  try{
+    const userId = req.session.userId;
+    const limit = Number(req.query.limit) || 20;
+
+    let lastPostCursor = null;
+    if (req.query.lastPostCursor){
+      lastPostCursor = decodeCursor(req.query.lastPostCursor);
+    }
+    const posts = await getFeed(userId, limit, lastPostCursor);
+
+    //console.log(` posts: ${posts.posts }`);
+    //console.log(` posts.length: ${posts.posts.length }`);
+
+
+    if (!posts.ok){
+      return res.status(404).json({ code: "POSTS_NOT_FOUND" });
+    }
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
 
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
 
+
+
+
+function decodeCursor(cursor) {
+  const cursorStr = Buffer.from(cursor, 'base64').toString('utf8');
+  return JSON.parse(cursorStr);
+}
