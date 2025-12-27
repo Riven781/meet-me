@@ -208,3 +208,4 @@ async function changeCounter(conn, postId, reactionType, delta) {
     );
   }
 }
+

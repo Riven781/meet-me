@@ -6,7 +6,7 @@ const maxHeight = 300;
 
 postBtn.parentElement.classList.toggle('show', textarea.value.trim() !== '');
 
-async function publishPost( text) {
+async function publishPost(text) {
   const response = await fetch('/api/createPost', {
     method: 'POST',
     headers: {
@@ -23,14 +23,14 @@ async function publishPost( text) {
   };
 }
 
-postBtn.addEventListener('click',async (e) => {
+postBtn.addEventListener('click', async (e) => {
   console.log('click');
   e.preventDefault();
   const text = textarea.value;
   console.log(text);
   const result = await publishPost(text);
 
-  if(result.ok) {
+  if (result.ok) {
     textarea.value = '';
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
@@ -45,7 +45,7 @@ postBtn.addEventListener('click',async (e) => {
 
     appModel.posts.push(result.data.postData);
     appModel.postsById[result.data.postData.id] = result.data.postData;
-    
+
 
     container.insertBefore(createPost(result.data.postData), container.firstChild);
 
@@ -94,10 +94,10 @@ function isEndNearViewport() {
 async function loadPosts(lastId = null) {
   if (loading || end) return;
   loading = true;
-  try{
+  try {
     const url = `/api/getPosts?limit=5${nextPostCursor ? `&lastPostCursor=${encodeURIComponent(nextPostCursor)}` : ''}`;
 
-    const res = await fetch(url,{
+    const res = await fetch(url, {
       method: 'GET',
       headers: {
       },
@@ -110,12 +110,12 @@ async function loadPosts(lastId = null) {
     console.log(data);
     nextPostCursor = data.nextPostCursor;
 
-    console.log(` loaded nextPostCursor: ${nextPostCursor }`);
-    if (nextPostCursor){
-      console.log(` decoded: ${encodeURIComponent(nextPostCursor) }`);
+    console.log(` loaded nextPostCursor: ${nextPostCursor}`);
+    if (nextPostCursor) {
+      console.log(` decoded: ${encodeURIComponent(nextPostCursor)}`);
     }
 
-    if (!nextPostCursor){
+    if (!nextPostCursor) {
       end = true;
     }
 
@@ -138,7 +138,7 @@ async function loadPosts(lastId = null) {
       }
     });
 
-  } catch (error){
+  } catch (error) {
     console.error(error);
   } finally {
     loading = false;
@@ -168,12 +168,12 @@ const observer = new IntersectionObserver((entries) => {
   const entry = entries[0];
   console.log('observing');
   console.log(entry.isIntersecting);
-  
+
   if (entry.isIntersecting) loadPosts();
-}, { 
+}, {
   root: null, //sprawdza czy element jest widoczny w oknie przeglądarki
   rootMargin: "200px",   //200px przed końcem strony pozwala na ładowanie nowych postów
-  threshold: 0.01 
+  threshold: 0.01
 });
 
 observer.observe(postEnd);
@@ -391,7 +391,7 @@ function createPost(post) {
   postDate.textContent = post.createdAt;
   postInformation.appendChild(postDate);
 
-  if (!post.observed){
+  if (!post.observed) {
     const addBtn = document.createElement('button');
     addBtn.classList.add('add-btn');
     postHeader.appendChild(addBtn);
@@ -437,7 +437,7 @@ function createPost(post) {
   heartCount.textContent = post.postHearts;
   interactionHeartWrapper.appendChild(heartCount);
 
-  if (post.liked == 1){
+  if (post.liked == 1) {
     heartBtn.classList.add('liked');
     heartCount.classList.add('liked');
   }
@@ -463,7 +463,7 @@ function createPost(post) {
   likeCount.textContent = post.postLikes;
   interactionLikesWrapper.appendChild(likeCount);
 
-  if (post.liked == 2){
+  if (post.liked == 2) {
     likeBtn.classList.add('liked');
     likeCount.classList.add('liked');
   }
@@ -487,7 +487,7 @@ function createPost(post) {
   dislikeCount.classList.add('yellow-reaction-count');
   interactionDislikesWrapper.appendChild(dislikeCount);
 
-  if (post.liked == 3){
+  if (post.liked == 3) {
     dislikeBtn.classList.add('liked');
     dislikeCount.classList.add('liked');
   }
@@ -500,7 +500,7 @@ function createPost(post) {
   const saveBtn = document.createElement('button');
   saveBtn.classList.add('interactions-btn');
   saveBtn.classList.add('save-btn');
-  if (post.saved == true){
+  if (post.saved == true) {
     saveBtn.classList.add('saved');
   }
   rightButtons.appendChild(saveBtn);
@@ -588,14 +588,14 @@ function createComment(comment) {
   heartCommentCount.classList.add('reactions-number');
   heartCommentCount.textContent = comment.commentHearts;
 
-  if (comment.isLiked == true){
+  if (comment.isLiked == true) {
     heartCommentBtn.textContent = '❤️';
     heartCommentCount.classList.add('liked');
   }
-  else{
+  else {
     heartCommentBtn.textContent = '🖤';
   }
-  
+
   commentHeartsWrapper.appendChild(heartCommentBtn);
 
 
@@ -691,11 +691,11 @@ function createReply(reply) {
   heartCommentCount.classList.add('reactions-number');
   heartCommentCount.textContent = reply.commentHearts;
 
-  if (reply.isLiked == true){
+  if (reply.isLiked == true) {
     heartCommentBtn.textContent = '❤️';
     heartCommentCount.classList.add('liked');
   }
-  else{
+  else {
     heartCommentBtn.textContent = '🖤';
   }
   commentHeartsWrapper.appendChild(heartCommentBtn);
@@ -756,7 +756,7 @@ document.querySelector('.posts').addEventListener('click', (e) => {
   if (e.target.matches(".heart-btn")) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
-  
+
     //heartPost(postId, postEl);
     heartPostServerCall(postId, postEl);
   }
@@ -764,12 +764,12 @@ document.querySelector('.posts').addEventListener('click', (e) => {
   if (e.target.matches(".dislike-btn")) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
-   
+
     //dislikePost(postId, postEl);
     dislikePostServerCall(postId, postEl);
   }
 
-  if (e.target.matches(".add-btn")){
+  if (e.target.matches(".add-btn")) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
     const followedAuthorId = appModel.postsById[postId].authorId
@@ -789,7 +789,7 @@ document.querySelector('.posts').addEventListener('click', (e) => {
     const undoBtn = document.createElement('button');
     undoBtn.classList.add('undo-btn');
     undoBtn.textContent = 'Undo';
-    
+
 
     setTimeout(() => {
       e.target.style.display = 'none';
@@ -800,12 +800,12 @@ document.querySelector('.posts').addEventListener('click', (e) => {
       info.appendChild(undoBtn);
 
       //info.textContent = `You've followed ${appModel.postsById[postId].authorName}'s posts!`;
-     
+
       e.target.parentElement.appendChild(info);
     }, 300)
   }
 
-  if (e.target.matches(".undo-btn")){
+  if (e.target.matches(".undo-btn")) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
     const authorId = appModel.postsById[postId].authorId;
@@ -823,14 +823,14 @@ document.querySelector('.posts').addEventListener('click', (e) => {
     })
   }
 
-  if(e.target.matches(".save-btn")){
-    
+  if (e.target.matches(".save-btn")) {
+
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
 
     const post = appModel.postsById[postId];
 
-    if(post.saved){
+    if (post.saved) {
       e.target.classList.remove('saved');
       post.saved = false;
     }
@@ -838,22 +838,22 @@ document.querySelector('.posts').addEventListener('click', (e) => {
       e.target.classList.add('saved');
       post.saved = true;
     }
-    
+
 
     //savePost(postId);
   }
 
-  if(e.target.matches(".heart-comment-btn")){
+  if (e.target.matches(".heart-comment-btn")) {
     const commentEl = e.target.closest(".comment-container");
     const replyEl = e.target.closest(".comment-reply");
-    
+
     const commentId = replyEl ? replyEl.dataset.commentId : commentEl.dataset.commentId;
-    
+
     const comment = appModel.commentsById[commentId];
     const counterEl = e.target.nextSibling;
 
 
-    if(comment.isLiked){ 
+    if (comment.isLiked) {
 
       e.target.textContent = '🖤';
       counterEl.classList.remove('liked');
@@ -865,7 +865,7 @@ document.querySelector('.posts').addEventListener('click', (e) => {
     else {
       e.target.textContent = '❤️';
       counterEl.classList.add('liked');
-      
+
       comment.isLiked = true;
       comment.commentHearts++;
       counterEl.textContent = comment.commentHearts;
@@ -877,13 +877,13 @@ document.querySelector('.posts').addEventListener('click', (e) => {
 })
 
 function setClassesForReactionButtons(elementsToAddClass, elementsToRemoveClass) {
-  if (elementsToAddClass){
+  if (elementsToAddClass) {
     if (elementsToAddClass.btn) elementsToAddClass.btn.classList.add('liked');
     if (elementsToAddClass.counter) elementsToAddClass.counter.classList.add('liked');
     elementsToAddClass.counter.textContent = elementsToAddClass.newCounter;
   }
 
-  if (elementsToRemoveClass){
+  if (elementsToRemoveClass) {
     if (elementsToRemoveClass.btn) elementsToRemoveClass.btn.classList.remove('liked');
     if (elementsToRemoveClass.counter) elementsToRemoveClass.counter.classList.remove('liked');
     elementsToRemoveClass.counter.textContent = elementsToRemoveClass.newCounter;
@@ -895,7 +895,8 @@ async function likePostServerCall(postId, postEl) {
   const previousReaction = appModel.postsById[postId].liked;
   const reactionType = appModel.postsById[postId].liked == 2 ? 0 : 2; //to chcemy ustawić 
   likePost(postId, postEl);
-  
+  const optimisticReaction = appModel.postsById[postId].liked;
+
   const response = await fetch('/api/reaction', {
     method: 'POST',
     headers: {
@@ -905,23 +906,20 @@ async function likePostServerCall(postId, postEl) {
   })
 
 
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) { data = {}; }
 
-  const data = await response.json();
 
-  if (!response.ok){
-    if (previousReaction != appModel.postsById[postId].liked){
-      if (previousReaction == 0 || previousReaction == 2){
-        likePost(postId, postEl);
-      }
-      else if (previousReaction == 1){
-        heartPost(postId, postEl);
-      }
-      else if (previousReaction == 3){
-        dislikePost(postId, postEl);
-      }
-    }
-  } else if (data.reaction !== appModel.postsById[postId].liked){
-    
+  const serverReaction =
+    typeof data.reaction === "number"
+      ? data.reaction
+      : previousReaction;
+
+
+  if (serverReaction !== optimisticReaction) {
+    synchronizeReactions(optimisticReaction, serverReaction, postId, postEl);
   }
 
   return {
@@ -938,7 +936,8 @@ async function heartPostServerCall(postId, postEl) {
   const previousReaction = appModel.postsById[postId].liked;
   const reactionType = appModel.postsById[postId].liked == 1 ? 0 : 1;
   heartPost(postId, postEl);
-  
+  const optimisticReaction = appModel.postsById[postId].liked;
+
   const response = await fetch('/api/reaction', {
     method: 'POST',
     headers: {
@@ -947,35 +946,36 @@ async function heartPostServerCall(postId, postEl) {
     body: JSON.stringify({ postId, reactionType })
   })
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) { data = {}; }
 
-  if (!response.ok){
-    if (previousReaction != appModel.postsById[postId].liked){
-      if (previousReaction == 0 || previousReaction == 2){
-        likePost(postId, postEl);
-      }
-      else if (previousReaction == 1){
-        heartPost(postId, postEl);
-      }
-      else if (previousReaction == 3){
-        dislikePost(postId, postEl);
-      }
-    }
+
+
+  const serverReaction =
+    typeof data.reaction === "number"
+      ? data.reaction
+      : previousReaction;
+
+
+  if (serverReaction !== optimisticReaction) {
+    synchronizeReactions(optimisticReaction, serverReaction, postId, postEl);
   }
-
   return {
     ok: response.ok,
     status: response.status,
     data
   }
-  
+
 }
 
 async function dislikePostServerCall(postId, postEl) {
   const previousReaction = appModel.postsById[postId].liked;
   const reactionType = appModel.postsById[postId].liked == 3 ? 0 : 3;
   dislikePost(postId, postEl);
-  
+  const optimisticReaction = appModel.postsById[postId].liked;
+
   const response = await fetch('/api/reaction', {
     method: 'POST',
     headers: {
@@ -984,26 +984,115 @@ async function dislikePostServerCall(postId, postEl) {
     body: JSON.stringify({ postId, reactionType })
   })
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) { data = {}; }
 
-  if (!response.ok){
-    if (previousReaction != appModel.postsById[postId].liked){
-      if (previousReaction == 0 || previousReaction == 2){
-        likePost(postId, postEl);
-      }
-      else if (previousReaction == 1){
-        heartPost(postId, postEl);
-      }
-      else if (previousReaction == 3){
-        dislikePost(postId, postEl);
-      }
-    }
+
+  const serverReaction =
+    typeof data.reaction === "number"
+      ? data.reaction
+      : previousReaction;
+
+
+  if (serverReaction !== optimisticReaction) {
+    synchronizeReactions(optimisticReaction, serverReaction, postId, postEl);
   }
 
   return {
     ok: response.ok,
     status: response.status,
     data
+  }
+}
+
+function setLike(postId, postEl) {
+  const likesCount = postEl.querySelector('.like-count');
+  const likeBtn = postEl.querySelector('.like-btn');
+  appModel.postsById[postId].liked = 2;
+  appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) + 1;
+  setClassesForReactionButtons({ btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes });
+}
+
+function setHeart(postId, postEl) {
+  const heartsCount = postEl.querySelector('.heart-count');
+  const heartBtn = postEl.querySelector('.heart-btn');
+  appModel.postsById[postId].liked = 1;
+  appModel.postsById[postId].postHearts = Number(appModel.postsById[postId].postHearts) + 1;
+  setClassesForReactionButtons({ btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts });
+}
+
+function setDislike(postId, postEl) {
+  const dislikesCount = postEl.querySelector('.dislike-count');
+  const dislikeBtn = postEl.querySelector('.dislike-btn');
+  appModel.postsById[postId].liked = 3;
+  appModel.postsById[postId].postDislikes = Number(appModel.postsById[postId].postDislikes) + 1;
+  setClassesForReactionButtons({ btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes });
+}
+
+function removeLike(postId, postEl) {
+  const likesCount = postEl.querySelector('.like-count');
+  const likeBtn = postEl.querySelector('.like-btn');
+  appModel.postsById[postId].liked = 0;
+  appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) - 1;
+  setClassesForReactionButtons(null,{ btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes });
+}
+
+function removeHeart(postId, postEl) {
+  const heartsCount = postEl.querySelector('.heart-count');
+  const heartBtn = postEl.querySelector('.heart-btn');
+  appModel.postsById[postId].liked = 0;
+  appModel.postsById[postId].postHearts = Number(appModel.postsById[postId].postHearts) - 1;
+  setClassesForReactionButtons(null, { btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts });
+}
+
+function removeDislike(postId, postEl) {
+  const dislikesCount = postEl.querySelector('.dislike-count');
+  const dislikeBtn = postEl.querySelector('.dislike-btn');
+  appModel.postsById[postId].liked = 0;
+  appModel.postsById[postId].postDislikes = Number(appModel.postsById[postId].postDislikes) - 1;
+  setClassesForReactionButtons(null, { btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes });
+}
+
+function synchronizeReactions(prev, newReaction, postId, postEl) {
+  if (prev === 0) {
+    if (newReaction === 1) {
+      setHeart(postId, postEl);
+    }
+    else if (newReaction === 2) {
+      setLike(postId, postEl);
+    }
+    else if (newReaction === 3) {
+      setDislike(postId, postEl);
+    }
+  }
+  else if (prev === 1) {
+    removeHeart(postId, postEl);
+    if (newReaction === 2) {
+      setLike(postId, postEl);
+    }
+    else if (newReaction === 3) {
+      setDislike(postId, postEl);
+    }
+  }
+  else if (prev === 2) {
+    removeLike(postId, postEl);
+    if (newReaction === 1) {
+      setHeart(postId, postEl);
+    }
+    else if (newReaction === 3) {
+      setDislike(postId, postEl);
+    }
+  }
+  else if (prev === 3) {
+    removeDislike(postId, postEl);
+    if (newReaction === 1) {
+      setHeart(postId, postEl);
+    }
+    else if (newReaction === 2) {
+      setLike(postId, postEl);
+    }
   }
 }
 
@@ -1011,20 +1100,20 @@ function likePost(postId, postEl) {
   const likesCount = postEl.querySelector('.like-count');
   const likeBtn = postEl.querySelector('.like-btn');
 
-  
+
   const likedStatus = appModel.postsById[postId].liked;
 
-  if (likedStatus == 0){
+  if (likedStatus == 0) {
     appModel.postsById[postId].liked = 2;
     appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) + 1;
-    setClassesForReactionButtons({btn:likeBtn,counter: likesCount, newCounter: appModel.postsById[postId].postLikes});
+    setClassesForReactionButtons({ btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes });
   }
   else if (likedStatus == 2) {
     appModel.postsById[postId].liked = 0;
     appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) - 1;
-    setClassesForReactionButtons(null, {btn:likeBtn,counter: likesCount, newCounter: appModel.postsById[postId].postLikes});
+    setClassesForReactionButtons(null, { btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes });
   }
-  else if (likedStatus == 1){
+  else if (likedStatus == 1) {
     const heartsCount = postEl.querySelector('.heart-count');
     const heartBtn = postEl.querySelector('.heart-btn');
     appModel.postsById[postId].liked = 2;
@@ -1032,11 +1121,11 @@ function likePost(postId, postEl) {
     appModel.postsById[postId].postHearts = Number(appModel.postsById[postId].postHearts) - 1;
 
     setClassesForReactionButtons(
-      {btn:likeBtn,counter: likesCount, newCounter: appModel.postsById[postId].postLikes},
-      {btn:heartBtn,counter: heartsCount, newCounter: appModel.postsById[postId].postHearts}
+      { btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes },
+      { btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts }
     );
   }
-  else if (likedStatus == 3){
+  else if (likedStatus == 3) {
     const dislikesCount = postEl.querySelector('.dislike-count');
     const dislikeBtn = postEl.querySelector('.dislike-btn');
     appModel.postsById[postId].liked = 2;
@@ -1044,8 +1133,8 @@ function likePost(postId, postEl) {
     appModel.postsById[postId].postDislikes = Number(appModel.postsById[postId].postDislikes) - 1;
 
     setClassesForReactionButtons(
-      {btn:likeBtn,counter: likesCount, newCounter: appModel.postsById[postId].postLikes},
-      {btn:dislikeBtn,counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes}
+      { btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes },
+      { btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes }
     );
   }
 
@@ -1053,8 +1142,8 @@ function likePost(postId, postEl) {
   //tu beziemy sprawdzać czy stan jest zgodny z odpoiwedzią serwera jeśli nie to trzeba zmienić tak jak jest na serwerze oraz może dać message co poszło nie tak
   /*
   np.
-  ustawiliśmy liked (status) na 2, a na serwerze zwrócił 1, wtedy usuwamy liked z naszego statusu i odejmujemy jeden a następnie ustawiamy stan na 1 dodajemy tam jeden i dodajemy klasę liked*/ 
- 
+  ustawiliśmy liked (status) na 2, a na serwerze zwrócił 1, wtedy usuwamy liked z naszego statusu i odejmujemy jeden a następnie ustawiamy stan na 1 dodajemy tam jeden i dodajemy klasę liked*/
+
 }
 
 
@@ -1064,17 +1153,17 @@ function heartPost(postId, postEl) {
 
   const likedStatus = appModel.postsById[postId].liked;
 
-  if (likedStatus == 0){
+  if (likedStatus == 0) {
     appModel.postsById[postId].liked = 1;
     appModel.postsById[postId].postHearts = Number(appModel.postsById[postId].postHearts) + 1;
-    setClassesForReactionButtons({btn:heartBtn,counter: heartsCount, newCounter: appModel.postsById[postId].postHearts});
+    setClassesForReactionButtons({ btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts });
   }
   else if (likedStatus == 1) {
     appModel.postsById[postId].liked = 0;
     appModel.postsById[postId].postHearts = Number(appModel.postsById[postId].postHearts) - 1;
-    setClassesForReactionButtons(null, {btn:heartBtn,counter: heartsCount, newCounter: appModel.postsById[postId].postHearts});
+    setClassesForReactionButtons(null, { btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts });
   }
-  else if (likedStatus == 2){
+  else if (likedStatus == 2) {
     const likesCount = postEl.querySelector('.like-count');
     const likeBtn = postEl.querySelector('.like-btn');
     appModel.postsById[postId].liked = 1;
@@ -1082,11 +1171,11 @@ function heartPost(postId, postEl) {
     appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) - 1;
 
     setClassesForReactionButtons(
-      {btn:heartBtn,counter: heartsCount, newCounter: appModel.postsById[postId].postHearts},
-      {btn:likeBtn,counter: likesCount, newCounter: appModel.postsById[postId].postLikes}
+      { btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts },
+      { btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes }
     );
   }
-  else if (likedStatus == 3){
+  else if (likedStatus == 3) {
     const dislikesCount = postEl.querySelector('.dislike-count');
     const dislikeBtn = postEl.querySelector('.dislike-btn');
     appModel.postsById[postId].liked = 1;
@@ -1094,8 +1183,8 @@ function heartPost(postId, postEl) {
     appModel.postsById[postId].postDislikes = Number(appModel.postsById[postId].postDislikes) - 1;
 
     setClassesForReactionButtons(
-      {btn:heartBtn,counter: heartsCount, newCounter: appModel.postsById[postId].postHearts},
-      {btn:dislikeBtn,counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes}
+      { btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts },
+      { btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes }
     );
   }
 }
@@ -1106,17 +1195,17 @@ function dislikePost(postId, postEl) {
 
   const likedStatus = appModel.postsById[postId].liked;
 
-  if (likedStatus == 0){
+  if (likedStatus == 0) {
     appModel.postsById[postId].liked = 3;
     appModel.postsById[postId].postDislikes = Number(appModel.postsById[postId].postDislikes) + 1;
-    setClassesForReactionButtons({btn:dislikeBtn,counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes});
+    setClassesForReactionButtons({ btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes });
   }
   else if (likedStatus == 3) {
     appModel.postsById[postId].liked = 0;
     appModel.postsById[postId].postDislikes = Number(appModel.postsById[postId].postDislikes) - 1;
-    setClassesForReactionButtons(null, {btn:dislikeBtn,counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes});
+    setClassesForReactionButtons(null, { btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes });
   }
-  else if (likedStatus == 1){
+  else if (likedStatus == 1) {
     const heartsCount = postEl.querySelector('.heart-count');
     const heartBtn = postEl.querySelector('.heart-btn');
     appModel.postsById[postId].liked = 3;
@@ -1124,11 +1213,11 @@ function dislikePost(postId, postEl) {
     appModel.postsById[postId].postHearts = Number(appModel.postsById[postId].postHearts) - 1;
 
     setClassesForReactionButtons(
-      {btn:dislikeBtn,counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes},
-      {btn:heartBtn,counter: heartsCount, newCounter: appModel.postsById[postId].postHearts}
+      { btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes },
+      { btn: heartBtn, counter: heartsCount, newCounter: appModel.postsById[postId].postHearts }
     );
   }
-  else if (likedStatus == 2){
+  else if (likedStatus == 2) {
     const likesCount = postEl.querySelector('.like-count');
     const likeBtn = postEl.querySelector('.like-btn');
     appModel.postsById[postId].liked = 3;
@@ -1136,8 +1225,8 @@ function dislikePost(postId, postEl) {
     appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) - 1;
 
     setClassesForReactionButtons(
-      {btn:dislikeBtn,counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes},
-      {btn:likeBtn,counter: likesCount, newCounter: appModel.postsById[postId].postLikes}
+      { btn: dislikeBtn, counter: dislikesCount, newCounter: appModel.postsById[postId].postDislikes },
+      { btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes }
     );
   }
 }

@@ -161,7 +161,7 @@ export async function setReactionToPost(userId, postId, reactionType) {
   return {
     ok: true,
     code: "REACTION_SET",
-    reaction
+    reaction : reaction  /*mozna sprawdzic czy dobrze dodajac 1 i sprawdzic czy w ui sie zgadza*/
   }
 }
 
