@@ -125,6 +125,8 @@ async function loadPosts(lastId = null) {
     appModel.posts.push(...newPosts);
     newPosts.forEach(post => {
       appModel.postsById[post.id] = post;
+      appModel.postsById[post.id].confirmedReaction = post.liked ?? 0;
+
     })
 
 
@@ -896,20 +898,34 @@ async function likePostServerCall(postId, postEl) {
   const reactionType = appModel.postsById[postId].liked == 2 ? 0 : 2; //to chcemy ustawić 
   likePost(postId, postEl);
   const optimisticReaction = appModel.postsById[postId].liked;
+  let response;
 
-  const response = await fetch('/api/reaction', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ postId, reactionType })
-  })
+  try {
+    response = await fetch('/api/reaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ postId, reactionType })
+    })
+  } catch (error) {
+    if (appModel.postsById[postId].confirmedReaction !== appModel.postsById[postId].liked) {
+      synchronizeReactions(appModel.postsById[postId].liked, appModel.postsById[postId].confirmedReaction, postId, postEl);
+    }
+
+    return
+
+  }
 
 
   let data;
   try {
     data = await response.json();
   } catch (error) { data = {}; }
+
+  if (typeof data.reaction === "number") {
+    appModel.postsById[postId].confirmedReaction = data.reaction;
+  }
 
 
   const serverReaction =
@@ -937,20 +953,32 @@ async function heartPostServerCall(postId, postEl) {
   const reactionType = appModel.postsById[postId].liked == 1 ? 0 : 1;
   heartPost(postId, postEl);
   const optimisticReaction = appModel.postsById[postId].liked;
+  let response;
 
-  const response = await fetch('/api/reaction', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ postId, reactionType })
-  })
+  try {
+    response = await fetch('/api/reaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ postId, reactionType })
+    })
+  } catch (error) {
+    if (appModel.postsById[postId].confirmedReaction !== appModel.postsById[postId].liked) {
+      synchronizeReactions(appModel.postsById[postId].liked, appModel.postsById[postId].confirmedReaction, postId, postEl);
+    }
+    return
+
+  }
 
   let data;
   try {
     data = await response.json();
   } catch (error) { data = {}; }
 
+  if (typeof data.reaction === "number") {
+    appModel.postsById[postId].confirmedReaction = data.reaction;
+  }
 
 
   const serverReaction =
@@ -976,18 +1004,32 @@ async function dislikePostServerCall(postId, postEl) {
   dislikePost(postId, postEl);
   const optimisticReaction = appModel.postsById[postId].liked;
 
-  const response = await fetch('/api/reaction', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ postId, reactionType })
-  })
+  let response;
+
+  try {
+    response = await fetch('/api/reaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ postId, reactionType })
+    })
+  } catch (error) {
+    if (appModel.postsById[postId].confirmedReaction !== appModel.postsById[postId].liked) {
+      synchronizeReactions(appModel.postsById[postId].liked, appModel.postsById[postId].confirmedReaction, postId, postEl);
+    }
+    return
+
+  }
+
 
   let data;
   try {
     data = await response.json();
   } catch (error) { data = {}; }
+  if (typeof data.reaction === "number") {
+    appModel.postsById[postId].confirmedReaction = data.reaction;
+  }
 
 
   const serverReaction =
@@ -1036,7 +1078,7 @@ function removeLike(postId, postEl) {
   const likeBtn = postEl.querySelector('.like-btn');
   appModel.postsById[postId].liked = 0;
   appModel.postsById[postId].postLikes = Number(appModel.postsById[postId].postLikes) - 1;
-  setClassesForReactionButtons(null,{ btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes });
+  setClassesForReactionButtons(null, { btn: likeBtn, counter: likesCount, newCounter: appModel.postsById[postId].postLikes });
 }
 
 function removeHeart(postId, postEl) {
@@ -1232,3 +1274,6 @@ function dislikePost(postId, postEl) {
 }
 
 
+setInterval(() => {
+  console.log('App model:', appModel.postsById[30].liked);
+}, 1000);

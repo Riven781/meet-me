@@ -181,7 +181,7 @@ export async function setReaction({ userId, postId, reactionType }) {
       );
       return rows2.length ? rows2[0].reaction : 0;
     } catch {
-      // jeśli DB naprawdę padło, zwracamy to co wiemy
+     
       return oldReaction;
     }
   } finally {

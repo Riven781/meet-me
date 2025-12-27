@@ -153,14 +153,10 @@ app.post('/api/reaction', requireAuth, async (req, res) => {
     const userId = req.session.userId;
     const { postId, reactionType } = req.body;
     const result = await setReactionToPost(userId, postId, reactionType);
-    if (result.ok) {
-      res.status(200).json(result);
-    } else {
-      res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-    }
+    res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR"});
   }
 });
 
