@@ -501,6 +501,10 @@ h1 {
 
 }
 
+.comment-data{
+  flex: 1 1 auto;
+}
+
 .comment-author-image {
 
   width: clamp(8px, 14vw, 40px);

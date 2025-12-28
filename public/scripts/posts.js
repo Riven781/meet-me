@@ -180,42 +180,67 @@ const observer = new IntersectionObserver((entries) => {
 
 observer.observe(postEnd);
 
-async function loadComments(postId, postEl, firstLoad) {
+async function loadComments(postId, postEl, firstLoad) {  //jeszcze end ktore usuniemy przy zamykaniu komentarzy
   let commentsByPostId = appModel.commentsByPostId[postId];
+  //console.log(appModel.commentsByPostId[postId].nextCommentCursor ?? '');
 
   if (!commentsByPostId) {
     commentsByPostId = {
       items: [],
       isLoading: false,
       error: null,
+      end: false,
     };
   }
 
   if (commentsByPostId.isLoading) return;
+  if (commentsByPostId.end) return;
 
   commentsByPostId.isLoading = true;
 
-  const res = await fetch('./../data/comments.json');
-  const comments = await res.json();
+  const url = `/api/getComments?postId=${postId}&limit=5 ${commentsByPostId.nextCommentCursor ? `&lastCommentCursor=${encodeURIComponent(commentsByPostId.nextCommentCursor)}` : ''}`;
 
-  comments.forEach(comment => {
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+
+    }
+  }
+  );
+  const data = await res.json();
+
+  console.log(postId);
+
+  console.log(data);
+
+  commentsByPostId.nextCommentCursor = data.nextCommentCursor;
+
+  if (!commentsByPostId.nextCommentCursor) {
+    commentsByPostId.end = true;
+  }
+
+  //console.log(` loaded nextCommentCursor: ${appModel.commentsByPostId[postId].nextCommentCursor}`);
+  appModel.commentsByPostId[postId] = commentsByPostId;
+
+  const newComments = data.comments || [];
+
+  newComments.forEach(comment => {
     appModel.commentsById[comment.id] = comment;
   })
 
-  commentsByPostId.items.push(...comments);
+  commentsByPostId.items.push(...newComments);
 
   commentsByPostId.isLoading = false;
 
-  appModel.commentsByPostId[postId] = commentsByPostId;
+  //appModel.commentsByPostId[postId] = commentsByPostId;
 
 
-  renderNewComments(comments, postEl, firstLoad);
-
-
+  renderNewComments(newComments, postEl, firstLoad, appModel.commentsByPostId[postId].end);
 
 }
 
-async function loadReplies(commentId, commentEl) {
+async function loadReplies(postId,commentId, commentEl) {
   let repliesByCommentId = appModel.repliesByCommentId[commentId];
 
   if (!repliesByCommentId) {
@@ -227,9 +252,27 @@ async function loadReplies(commentId, commentEl) {
   }
 
   if (repliesByCommentId.isLoading) return;
+  if (repliesByCommentId.end) return;
 
-  const res = await fetch('./../data/replies.json');
-  const replies = await res.json();
+  repliesByCommentId.isLoading = true;
+
+  const url = `/api/getComments?postId=${postId}&limit=5&parentId=${commentId}&lastCommentCursor=${encodeURIComponent(repliesByCommentId.nextCommentCursor ?? '')}`;
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      
+    }
+  });
+  const data = await res.json();
+
+  repliesByCommentId.nextCommentCursor = data.nextCommentCursor;
+
+  if (!repliesByCommentId.nextCommentCursor) {
+    repliesByCommentId.end = true;
+  }
+
+  const replies = data.comments || [];
 
   replies.forEach(reply => {
     appModel.commentsById[reply.id] = reply;
@@ -241,10 +284,10 @@ async function loadReplies(commentId, commentEl) {
 
   appModel.repliesByCommentId[commentId] = repliesByCommentId;
 
-  renderNewReplies(replies, commentEl);
+  renderNewReplies(replies, commentEl, appModel.repliesByCommentId[commentId].end);
 }
 
-function renderNewReplies(replies, commentEl) {
+function renderNewReplies(replies, commentEl, isEnd) {
   console.log("tuu")
   //w przyszłości będziemy tu przekazywali liste repplies orza zmienną isMore
 
@@ -266,11 +309,17 @@ function renderNewReplies(replies, commentEl) {
 
   container.appendChild(fragment);
 
-  container.appendChild(commentEl.querySelector('.more-replies-btn'));  //seeReplies wędruje na koniec
+  const seeMoreBtn = commentEl.querySelector('.more-replies-btn');
+
+  container.appendChild(seeMoreBtn);  //seeReplies wędruje na koniec
+
+  if (isEnd) {
+    seeMoreBtn.remove();
+  }
 }
 
 
-function renderNewComments(comments, postEl, firstLoad) {
+function renderNewComments(comments, postEl, firstLoad, isEnd) {
 
 
   const container = postEl.querySelector('.comments');
@@ -293,7 +342,10 @@ function renderNewComments(comments, postEl, firstLoad) {
 
   container.appendChild(fragment);
 
-  renderSeeMoreButton(container);
+  if (!isEnd) {
+    renderSeeMoreButton(container);
+  }
+
 
 }
 
@@ -329,6 +381,26 @@ function renderSeeMoreButton(container) {
 
 function renderCommentTextArea(container) {
   const form = document.createElement('form');
+
+
+
+
+  const labelArea = document.createElement('div');
+  labelArea.classList.add('label-area');
+  labelArea.style.display = 'none';
+  form.appendChild(labelArea);
+
+  const exitBtn = document.createElement('button');
+  exitBtn.classList.add('exit-btn');
+  exitBtn.type = 'button';
+  exitBtn.textContent = 'X';
+  labelArea.appendChild(exitBtn);
+
+  const label = document.createElement('label');
+  label.classList.add('reply-label');
+  label.textContent = 'Add a comment:';
+  labelArea.appendChild(label);
+
   form.classList.add('post-form');
   form.classList.add('comment-form');
   container.appendChild(form);
@@ -340,7 +412,7 @@ function renderCommentTextArea(container) {
   form.appendChild(textarea);
 
   const postBtn = document.createElement('button');
-  postBtn.type = 'submit';
+  postBtn.type = 'button';
   postBtn.id = 'create-comment-btn';
   postBtn.textContent = 'Post this comment';
   form.appendChild(postBtn);
@@ -603,7 +675,12 @@ function createComment(comment) {
 
   commentHeartsWrapper.appendChild(heartCommentCount);
 
+    const repliesContainer = document.createElement('section');
+    repliesContainer.classList.add('comments-replies');
+    repliesContainer.classList.add('comments');
+    commentContainer.appendChild(repliesContainer);
 
+    console.log(`replies: ${comment.commentReplies}`);
 
   if (comment.commentReplies > 0) {
     const seeMoreRepliesBtn = document.createElement('button');
@@ -626,15 +703,12 @@ function createComment(comment) {
     svg.appendChild(path);
 
     const span = document.createElement("span");
-    span.textContent = `See replies (${comment.commentReplies})`;
+    span.textContent = `See replies`;
     seeMoreRepliesBtn.appendChild(svg);
     seeMoreRepliesBtn.appendChild(span);
     commentContainer.appendChild(seeMoreRepliesBtn);
 
-    const repliesContainer = document.createElement('section');
-    repliesContainer.classList.add('comments-replies');
-    repliesContainer.classList.add('comments');
-    commentContainer.appendChild(repliesContainer);
+
   }
 
   return commentContainer;
@@ -710,24 +784,34 @@ function createReply(reply) {
 
 
 
-document.querySelector('.posts').addEventListener('click', (e) => {
+document.querySelector('.posts').addEventListener('click', async (e) => {
   if (e.target.matches(".comment-btn")) {
+    console.log('comment btn');
     const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
     const currentPostId = postEl.dataset.postId;
 
+    appModel.repliesByCommentId = {};
+
     for (const postId in appModel.commentsByPostId) {
+      console.log("blee");
       if (postId == currentPostId) continue;
       delete appModel.commentsByPostId[postId];
       const commentsToClose = document.querySelector(`.post-container[data-post-id="${postId}"]`);
       if (commentsToClose) clearComments(commentsToClose);
     }
-
+    requestAnimationFrame(() => {
+      postEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     if (appModel.commentsByPostId[currentPostId]) {
+
+      console.log('comments already loaded - removing');
       console.log('already loaded');
       delete appModel.commentsByPostId[currentPostId];
       clearComments(postEl);
     }
     else {
+      console.log('loading comments');
       loadComments(currentPostId, postEl, true);
     }
   }
@@ -735,12 +819,15 @@ document.querySelector('.posts').addEventListener('click', (e) => {
   if (e.target.closest(".more-replies-btn")) { //czasami zdarzenie matchowało span lub svg a nie button
     console.log('more replies');
     const commentEl = e.target.closest(".comment-container");
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
     const commentId = commentEl.dataset.commentId;
     console.log(commentEl);
-    loadReplies(commentId, commentEl);
+    loadReplies(postId, commentId, commentEl);
   }
 
   if (e.target.closest(".more-comments-btn")) {
+    console.log('more comments');
 
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
@@ -875,6 +962,145 @@ document.querySelector('.posts').addEventListener('click', (e) => {
 
     //heartComment(commentId, commentEl);
   }
+
+
+  if (e.target.matches("#create-comment-btn")) {  //sprawdz czy w tym poscie jest reply ustawione jesli tak to inaczej trzeba tym zarządzić
+    e.preventDefault();
+    const postEl = e.target.closest(".post-container");
+    const container = postEl.querySelector('.comments');
+    const textarea = postEl.querySelector('#comment-text');
+    //const commentReplies = postEl.querySelectorAll('.comments-replies');
+
+    if (textarea.value.trim() === '') {
+      return;
+    }
+    const postId = postEl.dataset.postId;
+    console.log('create comment');
+
+    let body;
+
+    if (appModel.postsById[postId].replyToComment) {
+      console.log('is a reply to comment', appModel.postsById[postId].replyToComment);
+      body = { postId, content: textarea.value, parentId: appModel.postsById[postId].replyToComment.parentId, replyToCommentId: appModel.postsById[postId].replyToComment.replyToCommentId };
+    }
+    else {
+      body = { postId, content: textarea.value };
+    }
+
+    //wyssylamy na serwer i dostaje w odpowiedzi ten post
+
+    try {
+      const response = await fetch('/api/postComment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        console.error('Error creating comment:', data.message || response.statusText);
+        return;
+      }
+
+      textarea.value = '';
+      textarea.style.height = 'auto';
+
+      if (data.comment) {
+        let newComment;
+
+        if (data.comment.parentId) {
+          const parentId = data.comment.parentId;
+
+          if (!appModel.repliesByCommentId[parentId]) {
+            appModel.repliesByCommentId[parentId] = {
+              items: [],
+              isLoading: false,
+              error: null,
+              nextReplyCursor: null
+            };
+          }
+
+          newComment = createReply(data.comment);
+          const parentComment = postEl.querySelector(`.comment-container[data-comment-id="${parentId}"]`);
+          console.log(parentId)
+          console.log(parentComment);
+          const replyContainer = parentComment.querySelector('.comments-replies');
+          console.log(replyContainer);
+          replyContainer.classList.add('active');
+
+
+          appModel.repliesByCommentId[parentId].items.push(data.comment);
+          appModel.commentsById[data.comment.id] = data.comment;
+       
+          const replyBefore = postEl.querySelector(`.comment-reply[data-comment-id="${appModel.postsById[postId].replyToComment.replyToCommentId}"]`);
+          if (replyBefore) {
+            replyContainer.insertBefore(newComment, replyBefore.nextSibling);
+          }
+          else{
+            console.log('appending reply'); //TODO zmien zeby zawsze na końcu
+            replyContainer.appendChild(newComment);
+          }
+          
+
+        }
+        else {
+          appModel.commentsById[data.comment.id] = data.comment;
+          appModel.commentsByPostId[postId].items.push(data.comment);
+          newComment = createComment(data.comment);
+          container.insertBefore(newComment, textarea.parentElement.nextSibling);
+        }
+
+
+
+      } else {
+        console.error('No comment data returned from server');
+      }
+    } catch (error) {
+      console.error('Network error:', error);
+    }
+  }
+
+  if (e.target.matches(".reply-btn")) {
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+    const commentEl = e.target.closest(".comment-container");
+    const replyEl = e.target.closest(".comment-reply");
+    const commentId = replyEl ? replyEl.dataset.commentId : commentEl.dataset.commentId;
+
+    console.log('reply to comment', commentId);
+
+    const labelArea = postEl.querySelector('.label-area');
+
+    appModel.postsById[postId].replyToComment = {
+      replyToCommentId: commentId,
+      parentId: commentEl.dataset.commentId
+    };
+
+    labelArea.style.display = 'flex';
+    labelArea.querySelector('.reply-label').textContent = `Replying to ${appModel.commentsById[commentId].authorName}:`;
+
+    const comment = appModel.commentsById[commentId];
+
+    const textarea = postEl.querySelector('#comment-text');
+
+
+    textarea.focus();
+  }
+
+  if (e.target.matches(".exit-btn")) {
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+    const labelArea = postEl.querySelector('.label-area');
+
+    appModel.postsById[postId].replyToComment = {};
+
+    labelArea.style.display = 'none';
+
+
+  }
+
 
 })
 
@@ -1273,7 +1499,7 @@ function dislikePost(postId, postEl) {
   }
 }
 
-
+/*
 setInterval(() => {
   console.log('App model:', appModel.postsById[30].liked);
-}, 1000);
+}, 1000);*/

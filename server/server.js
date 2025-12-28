@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment } from './service/users.js';
 import session from 'express-session';
 
 
@@ -31,8 +31,8 @@ app.use(session({
   }
 }));
 
-function requireAuth(req, res, next){
-  if (!req.session.userId){
+function requireAuth(req, res, next) {
+  if (!req.session.userId) {
     return res.status(401).json({ code: "UNAUTHORIZED" });
   }
   else {
@@ -41,8 +41,8 @@ function requireAuth(req, res, next){
 }
 
 
-function requireAuthPage(req, res, next){
-  if (!req.session.userId){
+function requireAuthPage(req, res, next) {
+  if (!req.session.userId) {
     return res.redirect('/start');
   }
   else {
@@ -68,13 +68,13 @@ app.get('/start', (req, res) => {
 
 
 app.post('/api/register', async (req, res) => {
-  try{
+  try {
     const result = await registerUser(req.body);
     if (result.ok) {
       res.status(200).json(result);
     } else {
       const status = result.code === "USER_ALREADY_EXISTS" ? 409 : 400;
-      
+
       res.status(status).json(result);
     }
   } catch (error) {
@@ -84,7 +84,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-  try{
+  try {
     const result = await loginUser(req.body);
     if (result.ok) {
       req.session.regenerate((err) => {  //usunie id starej sesji przy nowym zalogowaniu
@@ -97,8 +97,8 @@ app.post('/api/login', async (req, res) => {
           ok: true
         });
       });
-      
-      
+
+
     } else {
       res.status(401).json(result);
     }
@@ -109,7 +109,7 @@ app.post('/api/login', async (req, res) => {
 })
 
 app.post('/api/createPost', requireAuth, async (req, res) => {
-  try{
+  try {
     const result = await createPost(req.session.userId, req.body.text);
     if (result.ok) {
       res.status(200).json(result);
@@ -123,12 +123,12 @@ app.post('/api/createPost', requireAuth, async (req, res) => {
 });
 
 app.get("/api/getPosts", requireAuth, async (req, res) => {
-  try{
+  try {
     const userId = req.session.userId;
     const limit = Number(req.query.limit) || 20;
 
     let lastPostCursor = null;
-    if (req.query.lastPostCursor){
+    if (req.query.lastPostCursor) {
       lastPostCursor = decodeCursor(req.query.lastPostCursor);
     }
     const posts = await getFeed(userId, limit, lastPostCursor);
@@ -137,7 +137,7 @@ app.get("/api/getPosts", requireAuth, async (req, res) => {
     //console.log(` posts.length: ${posts.posts.length }`);
 
 
-    if (!posts.ok){
+    if (!posts.ok) {
       return res.status(404).json({ code: "POSTS_NOT_FOUND" });
     }
 
@@ -149,14 +149,58 @@ app.get("/api/getPosts", requireAuth, async (req, res) => {
 });
 
 app.post('/api/reaction', requireAuth, async (req, res) => {
-  try{
+  try {
     const userId = req.session.userId;
     const { postId, reactionType } = req.body;
     const result = await setReactionToPost(userId, postId, reactionType);
     res.status(200).json(result);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR"});
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+
+app.post('/api/postComment', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { postId, content, parentId, replyToCommentId } = req.body;
+    console.log(` parentId: ${parentId}`);
+    const result = await publishComment(userId, postId, content, parentId, replyToCommentId);
+    if (result.ok) {
+      res.status(200).json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+app.get('/api/getComments', requireAuth, async (req, res) => {
+  try {
+    const postId = Number(req.query.postId);
+    const limit = Number(req.query.limit) || 20;
+    let lastCommentCursor = null;
+    if (req.query.lastCommentCursor) {
+      lastCommentCursor = decodeCursor(req.query.lastCommentCursor);
+    }
+    if (req.query.parentId) {
+      const parentId = Number(req.query.parentId);
+      console.log(` parentId: ${parentId}`);
+      const comments = await getRepliesForComment(parentId, limit, lastCommentCursor);
+      console.log(` comments: ${JSON.stringify(comments)}`);
+      res.status(200).json(comments);
+      return;
+    } else {
+      const comments = await getCommentsForPost(postId, limit, lastCommentCursor);
+      res.status(200).json(comments);
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
   }
 });
 

@@ -95,6 +95,74 @@ export async function getPosts(userId, limit = 20, lastPostCursor = null) {
 
 //zaczynamy od najnowszych postów i idziemy do starszych (gdyby posty były stworozne tego samego dnia to i tak różni ich id)
 
+
+export async function getComments(postId, limit = 20, lastCommentCursor = null) {
+  let rows;
+  if (!lastCommentCursor) {
+    [rows] = await db.query(`
+      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      INNER JOIN Users ON Comments.user_id = Users.id
+      WHERE Comments.post_id = ? AND Comments.parent_id IS NULL
+      ORDER BY Comments.created_at DESC, Comments.id DESC
+      LIMIT ?`
+      , [postId, limit]);
+  }
+  else {
+    const { lastCreatedAt, lastId } = lastCommentCursor;
+    [rows] = await db.query(`
+      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      INNER JOIN Users ON Comments.user_id = Users.id
+      WHERE (Comments.post_id = ? AND Comments.parent_id IS NULL) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
+      ORDER BY Comments.created_at DESC, Comments.id DESC
+      LIMIT ?`
+      , [postId, lastCreatedAt, lastCreatedAt, lastId, limit]);
+  }
+
+  const nextCommentCursor = rows.length === limit ? encodeCursor({
+    lastCreatedAt: rows[rows.length - 1].created_at,
+    lastId: rows[rows.length - 1].id
+  }) : null;
+
+  return {
+    comments: rows,
+    nextCommentCursor
+  };
+}
+
+export async function getReplies(parentId, limit = 20, lastCommentCursor = null) {
+  let rows;
+  if (!lastCommentCursor) {
+    [rows] = await db.query(`
+      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      INNER JOIN Users ON Comments.user_id = Users.id
+      WHERE Comments.parent_id = ?
+      ORDER BY Comments.created_at DESC, Comments.id DESC
+      LIMIT ?`
+      , [parentId, limit]);
+  }
+  else {
+    const { lastCreatedAt, lastId } = lastCommentCursor;
+    [rows] = await db.query(`
+      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      INNER JOIN Users ON Comments.user_id = Users.id
+      WHERE (Comments.parent_id = ?) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
+      ORDER BY Comments.created_at DESC, Comments.id DESC
+      LIMIT ?`
+      , [parentId, lastCreatedAt, lastCreatedAt, lastId, limit]);
+  }
+
+  const nextCommentCursor = rows.length === limit ? encodeCursor({
+    lastCreatedAt: rows[rows.length - 1].created_at,
+    lastId: rows[rows.length - 1].id
+  }) : null;
+
+  return {
+    comments: rows.reverse(),
+    nextCommentCursor
+  };
+}
+
+
 function encodeCursor({ lastCreatedAt, lastId }) {
   const cursorStr = JSON.stringify({ lastCreatedAt, lastId });
   return Buffer.from(cursorStr).toString('base64');
@@ -181,13 +249,61 @@ export async function setReaction({ userId, postId, reactionType }) {
       );
       return rows2.length ? rows2[0].reaction : 0;
     } catch {
-     
+
       return oldReaction;
     }
   } finally {
     await conn.release();
   }
 }
+
+
+export async function insertComment({ user_id, post_id, content, parent_id = null }) {
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const [res] = await conn.execute(
+      `INSERT INTO Comments (user_id, post_id, content, parent_id)
+      VALUES (?, ?, ?, ?)`,
+      [user_id, post_id, content, parent_id]
+    );
+
+    if (parent_id !== null) {
+      await conn.execute(
+        `UPDATE Comments
+        SET reply_count = reply_count + 1
+        WHERE id = ?`,
+        [parent_id]
+      );
+    }
+
+    await conn.execute(
+      `UPDATE Posts
+      SET reply_count = reply_count + 1
+      WHERE id = ?`,
+      [post_id]
+    );
+    await conn.commit();
+    return res.insertId;
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    await conn.release();
+  }
+}
+
+export async function getCommentById(id) {
+  const [rows] = await db.query(`
+    SELECT Comments.id, user_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+    INNER JOIN Users ON Comments.user_id = Users.id
+    WHERE Comments.id = ?`
+    , [id]);
+  return rows[0];
+}
+
+
 
 
 async function changeCounter(conn, postId, reactionType, delta) {

@@ -1,5 +1,5 @@
 import e from 'express';
-import { createUser, getPostById, getPosts, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertPost, setReaction } from '../repository/users.js'
+import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction } from '../repository/users.js'
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -156,16 +156,144 @@ export async function getFeed(userId, limit = 20, lastPostCursor = null) {
 
 }
 
+
+export async function getCommentsForPost(postId, limit = 20, lastCommentCursor = null) {
+  try {
+    const data = await getComments(postId, limit, lastCommentCursor);
+    const rows = data.comments;
+    if (rows.length > 0) {
+
+      const formattedComments = rows.map(comment => getCommentData(comment));
+      return {
+        ok: true,
+        comments: formattedComments,
+        code: "COMMENTS_FOUND",
+        nextCommentCursor: data.nextCommentCursor
+      }
+    }
+    else {
+      return {
+        ok: true,
+        code: "NO_COMMENTS_FOUND",
+        comments: [],
+        nextCommentCursor: null
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      code: "COMMENTS_NOT_FOUND_ERROR",
+      errors: {
+        text: "Comments not found"
+      }
+    }
+  }
+}
+
+export async function getRepliesForComment(parentId, limit = 20, lastCommentCursor = null) {
+  try {
+    const data = await getReplies(parentId, limit, lastCommentCursor);
+    const rows = data.comments;
+    if (rows.length > 0) {
+
+      const formattedComments = rows.map(comment => getCommentData(comment));
+      return {
+        ok: true,
+        comments: formattedComments,
+        code: "COMMENTS_FOUND",
+        nextCommentCursor: data.nextCommentCursor
+      }
+    }
+    else {
+      return {
+        ok: true,
+        code: "NO_COMMENTS_FOUND",
+        comments: [],
+        nextCommentCursor: null
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      code: "COMMENTS_NOT_FOUND_ERROR",
+errors: {
+      text: error?.message ?? "Comments not found",
+      sqlMessage: error?.sqlMessage,
+      code: error?.code,
+    }
+    }
+  }
+}
+
+
+export async function publishComment(userId, postId, content, parentId = null, replyToCommentId = null) {
+  try {
+    if (replyToCommentId != null) {
+      try {
+        const commentReply = await getCommentById(replyToCommentId);
+        const authorId = commentReply.user_id;
+        if (authorId !== userId) {
+          console.log(` authorId: ${authorId}, userId: ${userId}`);
+          content = `@${commentReply.username} ${content}`;
+        }
+      }
+      catch (e) {
+        console.error('Reply to comment not found');
+      }
+    }
+
+    const commentId = await insertComment({ user_id: userId, post_id: postId, content, parent_id: parentId });
+
+
+    let comment = null;
+    try {
+      comment = await getCommentById(commentId);
+    } catch (error) {
+      console.error(error);
+    }
+
+    return {
+      ok: true,
+      commentId,
+      comment: comment ? getCommentData(comment) : null,
+      code: "COMMENT_CREATED"
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      code: "COMMENT_NOT_CREATED_ERROR",
+      errors: {
+        text: "Comment not created"
+      }
+    }
+  }
+}
+
+
+
+
 export async function setReactionToPost(userId, postId, reactionType) {
   const reaction = await setReaction({ userId, postId, reactionType });
   return {
     ok: true,
     code: "REACTION_SET",
-    reaction : reaction  /*mozna sprawdzic czy dobrze dodajac 1 i sprawdzic czy w ui sie zgadza*/
+    reaction: reaction  /*mozna sprawdzic czy dobrze dodajac 1 i sprawdzic czy w ui sie zgadza*/
   }
 }
 
-
+function getCommentData(comment) {
+  return {
+    id: comment.id,
+    authorName: comment.username,
+    commentText: comment.content,
+    createdAt: comment.created_at,
+    commentHearts: comment.heart_count,
+    commentReplies: comment.reply_count,
+    parentId: comment.parent_id,
+    authorImage: comment.avatar_img_url ?? "/avatars/default-avatar.jpg",  //z bazy to pobrac trzeba bedzie
+    isLiked: false
+  }
+}
 
 
 function getPostData(post, isCreatedByUser) {
