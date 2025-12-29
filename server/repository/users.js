@@ -45,12 +45,12 @@ export async function insertPost({ user_id, text }) {
 }
 
 
-export async function getPostById(id) {
+export async function getPostById(id, userId) {
   const [rows] = await db.query(`
-    SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reply_count, last_modified_at, edited FROM Posts
+    SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reply_count, last_modified_at, Users.id = ? AS isCreatedByUser, edited FROM Posts
     INNER JOIN Users ON Posts.user_id = Users.id
     WHERE Posts.id = ?`
-    , [id]);
+    , [userId, id]);
   return rows[0];
 }
 

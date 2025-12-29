@@ -124,6 +124,7 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/createPost', requireAuth, async (req, res) => {
   try {
     const result = await createPost(req.session.userId, req.body.text);
+    console.log(JSON.stringify(result));
     if (result.ok) {
       res.status(200).json(result);
     } else {
@@ -292,7 +293,7 @@ app.patch("/api/posts/:postId", requireAuth, async (req, res) => {
     const username = req.session.username;
 
     try {
-      const data = await getPostByPostId(postId);
+      const data = await getPostByPostId(postId, userId);
       if (data.postData.authorName !== username) {
         return res.status(401).json({ code: "UNAUTHORIZED" });
       }
@@ -311,7 +312,7 @@ app.patch("/api/posts/:postId", requireAuth, async (req, res) => {
       return res.status(400).json(result);
     }
 
-    const afterEditPost = await getPostByPostId(postId);
+    const afterEditPost = await getPostByPostId(postId, userId);
 
     if (!afterEditPost.ok) {
       return res.status(404).json({ code: "POST_NOT_FOUND" });
@@ -329,7 +330,8 @@ app.delete("/api/posts/:postId", requireAuth, async (req, res) => {
     const postId = Number(req.params.postId);
     console.log(`postId: ${postId}`);
     const username = req.session.username;
-    const data = await getPostByPostId(postId);
+    const userId = req.session.userId;
+    const data = await getPostByPostId(postId, userId);
     if (data.postData.authorName !== username) {
       console.log(`post.authorName: ${data.postData.authorName}, username: ${username}`);
       return res.status(404).json({ code: "UNAUTHORIZED" });

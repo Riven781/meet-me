@@ -2,6 +2,7 @@ import e from 'express';
 import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost, deletePostById } from '../repository/users.js'
 
 
+
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
   if (!isValid) {
@@ -73,9 +74,9 @@ export async function loginUser(userData) {
   }
 }
 
-export async function getPostByPostId(postId) {
+export async function getPostByPostId(postId, userId) {
   try{
-    const postData = await getPostById(postId);
+    const postData = await getPostById(postId, userId);
     console.log(` postData: ${JSON.stringify(postData)}`);
     if (postData) {
       return {
@@ -134,7 +135,8 @@ export async function createPost(userId, text) {
 
 
   try {
-    const postData = await getPostById(postId);
+    const postData = await getPostById(postId, userId);
+    console.log(` postData: ${JSON.stringify(postData)}`);
 
     if (postData) {
       return {
