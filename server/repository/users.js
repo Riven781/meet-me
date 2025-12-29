@@ -96,6 +96,44 @@ export async function getPosts(userId, limit = 20, lastPostCursor = null) {
 //zaczynamy od najnowszych postów i idziemy do starszych (gdyby posty były stworozne tego samego dnia to i tak różni ich id)
 
 
+
+export async function getPostsByUsername(userId, username, limit = 20, lastPostCursor = null) {
+  let rows;
+  if (!lastPostCursor){
+    [rows] = await db.query(`
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count FROM Posts 
+     INNER JOIN Users ON Posts.user_id = Users.id
+     LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
+     WHERE Users.username = ?
+     ORDER BY Posts.created_at DESC, Posts.id DESC
+     LIMIT ?`
+     , [userId, username, limit]);
+  }
+  else{
+    const { lastCreatedAt, lastId } = lastPostCursor;
+    [rows] = await db.query(`
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count FROM Posts 
+     INNER JOIN Users ON Posts.user_id = Users.id
+     LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
+     WHERE Users.username = ? AND (Posts.created_at < ? OR (Posts.created_at = ? AND Posts.id < ?))
+     ORDER BY Posts.created_at DESC, Posts.id DESC
+     LIMIT ?`
+     , [userId, username, lastCreatedAt, lastCreatedAt, lastId, limit]);
+  }
+
+  const nextPostCursor = rows.length === limit ? encodeCursor({
+    lastCreatedAt: rows[rows.length - 1].created_at,
+    lastId: rows[rows.length - 1].id
+  }) : null;
+  return {
+    posts: rows,
+    nextPostCursor
+  };
+  
+  
+
+}
+
 export async function getComments(postId, limit = 20, lastCommentCursor = null) {
   let rows;
   if (!lastCommentCursor) {
@@ -394,4 +432,9 @@ export async function unlikeComment(user_id, comment_id) {
   } finally {
     await conn.release();
   }
+}
+
+export async function findUserByUsername(username){
+  const [rows] = await db.query('SELECT id, username, avatar_img_url, background_img_url FROM Users WHERE username = ?', [username]);
+  return rows[0];
 }

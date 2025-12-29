@@ -2,6 +2,24 @@ const textarea = document.getElementById("post-text");
 const postBtn = document.getElementById("post-btn");
 const commentBtn = document.getElementsByClassName("comment-btn");
 
+let username = isProfileMode();
+
+function isProfileMode(){
+  const pathParts = window.location.pathname.split('/');
+  console.log(pathParts);
+  const profileIndex = pathParts.indexOf('profile');
+  console.log(profileIndex);
+
+  if (profileIndex === -1 || !pathParts[profileIndex + 1]) {
+    console.log(pathParts[profileIndex + 1]);
+    return '';
+  }
+  else{
+    return pathParts[profileIndex + 1];
+    
+  }
+}
+
 const maxHeight = 300;
 
 postBtn.parentElement.classList.toggle('show', textarea.value.trim() !== '');
@@ -95,7 +113,8 @@ async function loadPosts(lastId = null) {
   if (loading || end) return;
   loading = true;
   try {
-    const url = `/api/getPosts?limit=5${nextPostCursor ? `&lastPostCursor=${encodeURIComponent(nextPostCursor)}` : ''}`;
+    console.log(`username: ${username}`);
+    const url = `/api/getPosts?limit=5${nextPostCursor ? `&lastPostCursor=${encodeURIComponent(nextPostCursor)}` : ''}${username !== '' ? `&username=${username}` : ''}`;
 
     const res = await fetch(url, {
       method: 'GET',
@@ -959,7 +978,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
     const req = nextLiked ? likeComment(commentId) : unlikeComment(commentId);
 
-    console.log(`bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`);
+    
 
     req.catch(error => {
       comment.isLiked = prevLiked;

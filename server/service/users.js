@@ -1,5 +1,6 @@
 import e from 'express';
-import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment } from '../repository/users.js'
+import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername } from '../repository/users.js'
+
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -157,6 +158,39 @@ export async function getFeed(userId, limit = 20, lastPostCursor = null) {
 
 }
 
+export async function getPostByUser(userId, username, limit = 20, lastPostCursor = null) {
+  try {
+    const data = await getPostsByUsername(userId, username, limit, lastPostCursor);
+    if (data.posts.length > 0) {
+      const formattedPosts = data.posts.map(post => getPostData(post, false));
+      return {
+        ok: true,
+        posts: formattedPosts,
+        code: "POSTS_FOUND",
+        nextPostCursor: data.nextPostCursor
+      }
+    }
+    else {
+      return {
+        ok: true,
+        code: "NO_POSTS_FOUND",
+        posts: [],
+        nextPostCursor: null
+      }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      code: "POSTS_NOT_FOUND_ERROR",
+      errors: {
+        text: "Posts not found"
+      }
+    }
+  }
+  
+  
+}
+
 
 export async function getCommentsForPost(postId, limit = 20, lastCommentCursor = null) {
   try {
@@ -296,6 +330,14 @@ function getCommentData(comment) {
   }
 }
 
+function getProfileData(user){
+  return{
+    username: user.username,
+    authorImage: user.avatar_img_url ?? "/avatars/default-avatar.jpg",
+    backgroundImage: user.background_img_url ?? "/images/default-avatar.jpg",
+  }
+}
+
 
 function getPostData(post, isCreatedByUser) {
   return {
@@ -393,6 +435,38 @@ export async function removeCommentLike(userId, commentId) {
       code: "COMMENT_UNLIKE_FAILED",
       errors: {
         text: "Comment not unliked"
+      }
+    }
+  }
+}
+
+export async function getUserByUsername(username) {
+  try{
+    const user = await findUserByUsername(username);
+    //console.log(user);
+    //console.log(user.username);
+    if (!user) {
+      console.log("user not found ---");
+      return {
+        ok: false,
+        code: "USER_NOT_FOUND",
+        errors: {
+          username: "User not found"
+        }
+      }
+    }
+    return {
+      ok: true,
+      code: "USER_FOUND",
+      user : getProfileData(user)
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "USER_NOT_FOUND",
+      errors: {
+        username: "User not found"
       }
     }
   }

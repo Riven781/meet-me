@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostByUser } from './service/users.js';
 import session from 'express-session';
 
 
@@ -17,6 +17,8 @@ app.use(express.json());
 
 app.use("/avatars", express.static(path.join(__dirname, "../public/images/avatars")));
 app.use(express.static(path.join(__dirname, '../public')));
+
+
 
 app.use(session({
   name: 'meet-me-session',
@@ -56,9 +58,7 @@ protectedRouter.get('/posts', (req, res) => {
   res.sendFile(path.join(__dirname, '../protected/posts.html'));
 });
 
-protectedRouter.get('/profile/:username', (req, res) => {
-  const username = req.params.username;
-  const user = findUserByUsername(username);
+protectedRouter.get('/profile/:username', async (req, res) => {
   res.sendFile(path.join(__dirname, '../protected/profile.html'));
 });
 
@@ -134,7 +134,15 @@ app.get("/api/getPosts", requireAuth, async (req, res) => {
     if (req.query.lastPostCursor) {
       lastPostCursor = decodeCursor(req.query.lastPostCursor);
     }
-    const posts = await getFeed(userId, limit, lastPostCursor);
+    console.log(` username: ${req.query.username}`);
+    let posts;
+    if (req.query.username) {
+
+      posts = await getPostByUser(userId, req.query.username, limit, lastPostCursor);
+    }
+    else {
+      posts = await getFeed(userId, limit, lastPostCursor);
+    }
 
     //console.log(` posts: ${posts.posts }`);
     //console.log(` posts.length: ${posts.posts.length }`);
@@ -213,13 +221,13 @@ app.put("/api/comments/:commentId/like", requireAuth, async (req, res) => {
     console.log(`put`);
     const commentId = Number(req.params.commentId);
     const userId = req.session.userId;
-    
-    const result = await addCommentLike( userId, commentId);
-    
+
+    const result = await addCommentLike(userId, commentId);
+
     if (!result.ok) {
       return res.status(400).json(result);
     }
-    else{
+    else {
       res.sendStatus(204);
     }
   } catch (error) {
@@ -234,11 +242,11 @@ app.delete("/api/comments/:commentId/like", requireAuth, async (req, res) => {
     console.log(`delete`);
     const commentId = Number(req.params.commentId);
     const userId = req.session.userId;
-    const result = await removeCommentLike( userId, commentId);
+    const result = await removeCommentLike(userId, commentId);
     if (!result.ok) {
       return res.status(400).json(result);
     }
-    else{
+    else {
       res.sendStatus(204);
     }
   } catch (error) {
@@ -250,6 +258,20 @@ app.delete("/api/comments/:commentId/like", requireAuth, async (req, res) => {
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
+
+app.get("/api/profile/:username", requireAuth, async (req, res) => {
+  try {
+    const username = req.params.username;
+    const user = await getUserByUsername(username);
+    if (!user.ok) {
+      return res.status(404).json({ code: "USER_NOT_FOUND" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
 
 
 
