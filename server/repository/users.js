@@ -434,6 +434,11 @@ export async function unlikeComment(user_id, comment_id) {
   }
 }
 
+export async function deletePostById(postId){
+  const [res] = await db.query(`DELETE FROM Posts WHERE id = ?`, [postId]);
+  return res.affectedRows === 1;
+}
+
 
 export async function updatePost(postId, text) {
   const [res] = await db.query(`UPDATE Posts SET text = ?, last_modified_at = NOW(), edited = TRUE WHERE id = ?`, [text, postId]);

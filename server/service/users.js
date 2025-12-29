@@ -1,5 +1,5 @@
 import e from 'express';
-import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost } from '../repository/users.js'
+import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost, deletePostById } from '../repository/users.js'
 
 
 export async function registerUser(user) {
@@ -336,7 +336,33 @@ export async function publishComment(userId, postId, content, parentId = null, r
   }
 }
 
-
+export async function deletePost(commentId) {
+  try{
+    const result = await deletePostById(commentId);
+    if (!result) {
+      return {
+        ok: false,
+        code: "COMMENT_NOT_DELETED",
+        errors: {
+          text: "Comment not deleted --"
+        }
+      }
+    }
+    return {
+      ok: true,
+      code: "COMMENT_DELETED"
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "COMMENT_NOT_DELETED",
+      errors: {
+        text: "Comment not deleted"
+      }
+    }
+  }
+}
 
 
 export async function setReactionToPost(userId, postId, reactionType) {

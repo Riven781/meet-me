@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost, deletePost } from './service/users.js';
 import session from 'express-session';
 
 
@@ -308,6 +308,27 @@ app.patch("/api/posts/:postId", requireAuth, async (req, res) => {
     }
     res.status(200).json(afterEditPost);
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
+app.delete("/api/posts/:postId", requireAuth, async (req, res) => {
+  try {
+    console.log(`delete`);
+    const postId = Number(req.params.postId);
+    console.log(`postId: ${postId}`);
+    const username = req.session.username;
+    const post = await getPostByPostId(postId);
+    if (post.authorName !== username) {
+      return res.status(404).json({ code: "UNAUTHORIZED" });
+    }
+    const result = await deletePost(postId);
+    console.log(`result: ${JSON.stringify(result)}`);
+    if (!result.ok) {
+      return res.status(400).json({ code: "POST_DELETE_FAILED" });
+    }
+    res.sendStatus(204);
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });

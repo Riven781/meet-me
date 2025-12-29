@@ -5,7 +5,7 @@ const commentBtn = document.getElementsByClassName("comment-btn");
 
 let username = isProfileMode();
 
-function isProfileMode(){
+function isProfileMode() {
   const pathParts = window.location.pathname.split('/');
   console.log(pathParts);
   const profileIndex = pathParts.indexOf('profile');
@@ -15,9 +15,9 @@ function isProfileMode(){
     console.log(pathParts[profileIndex + 1]);
     return '';
   }
-  else{
+  else {
     return pathParts[profileIndex + 1];
-    
+
   }
 }
 
@@ -484,7 +484,7 @@ function createPost(post) {
   link2.classList.add('author-name-link');
   link2.href = `/meet-me/profile/${post.authorName}`;
   postInformation.appendChild(link2);
-  
+
 
   const authorName = document.createElement('h2');
   authorName.classList.add('author-name');
@@ -494,16 +494,16 @@ function createPost(post) {
 
   const postDate = document.createElement('div');
   postDate.classList.add('post-date');
-  if (post.edited){
+  if (post.edited) {
     postDate.textContent = post.last_modified_at + ' (edited)';
   }
-  else{
+  else {
     postDate.textContent = post.createdAt;
   }
-  
+
   postInformation.appendChild(postDate);
 
-  if(post.isCreatedByUser){
+  if (post.isCreatedByUser) {
     const actionPostBtn = document.createElement('button');
     actionPostBtn.classList.add('action-btn');
     actionPostBtn.classList.add('action-post-btn');
@@ -1047,7 +1047,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
     const req = nextLiked ? likeComment(commentId) : unlikeComment(commentId);
 
-    
+
 
     req.catch(error => {
       comment.isLiked = prevLiked;
@@ -1203,23 +1203,54 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
 
   }
-  if(e.target.matches('.edit-btn')) {
+
+
+  if (e.target.matches('.delete-btn')) {
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+
+    const response = await fetch(`/api/posts/${postId}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      console.log('post deleted');
+      postEl.remove();
+      appModel.posts = appModel.posts.filter(post => post.id !== postId);
+      delete appModel.postsById[postId];
+
+      if (appModel.commentsByPostId[postId]) {
+        appModel.commentsByPostId[postId].items.forEach(commentId => {
+          delete appModel.repliesByCommentId[commentId];
+          delete appModel.commentsById[commentId];
+        })
+
+        delete appModel.commentsByPostId[postId];
+      }
+
+    }
+    optionMenu.postId = null;
+
+  }
+
+  if (e.target.matches('.edit-btn')) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
     const postContent = postEl.querySelector('.post-content p');
     postContent.contentEditable = true;
     postContent.classList.add('editable');
     const editingContainer = postEl.querySelector('.editing-container');
-
     editingContainer.style.display = 'flex';
-    
-
   }
 
   if (e.target.matches('.save-edit-btn')) {
     const postEl = e.target.closest(".post-container");
     const postId = postEl.dataset.postId;
-    
+
     const res = await fetch(`/api/posts/${postId}`, {
       method: "PATCH",
       credentials: "include",
@@ -1229,15 +1260,15 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
       body: JSON.stringify({ content: postEl.querySelector('.post-content p').textContent }),
     });
     if (!res.ok) throw new Error(`PUT like failed: ${res.status}`);
-    
+
     const data = await res.json();
 
     const postData = data.postData;
 
     console.log(data);
 
-    
-    
+
+
     appModel.postsById[postId].postText = postData.postText;
     const postContent = postEl.querySelector('.post-content p');
     postContent.textContent = appModel.postsById[postId].postText;
@@ -1264,7 +1295,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
     editingContainer.style.display = 'none';
 
   }
-  
+
 
   if (e.target.matches(".action-post-btn")) {
 
@@ -1283,7 +1314,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
     optionMenu.postId = postId;
     createOptionsMenu(postId, actionBtn);
-  } else{
+  } else {
     if (optionMenu.postId) {
       removeOptionsMenu();
       optionMenu.postId = null;
@@ -1296,7 +1327,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
 
 function createOptionsMenu(postId, actionBtn) {
-  
+
   const menuOptions = document.createElement('div');
   menuOptions.classList.add('menu-options');
 
@@ -1315,14 +1346,14 @@ function createOptionsMenu(postId, actionBtn) {
   menuOptions.appendChild(deleteBtn);
   const header = actionBtn.closest(".post-header");
   header.appendChild(menuOptions);
-  
+
 
   //actionBtn.nextSibling.appendChild(menuOptions);
-  
+
 }
 
-function removeOptionsMenu(){
-  
+function removeOptionsMenu() {
+
   document.querySelector('.menu-options').remove();
 }
 
