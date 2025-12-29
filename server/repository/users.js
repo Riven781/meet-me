@@ -100,8 +100,9 @@ export async function getComments(postId, limit = 20, lastCommentCursor = null) 
   let rows;
   if (!lastCommentCursor) {
     [rows] = await db.query(`
-      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE Comments.post_id = ? AND Comments.parent_id IS NULL
       ORDER BY Comments.created_at DESC, Comments.id DESC
       LIMIT ?`
@@ -110,8 +111,9 @@ export async function getComments(postId, limit = 20, lastCommentCursor = null) 
   else {
     const { lastCreatedAt, lastId } = lastCommentCursor;
     [rows] = await db.query(`
-      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE (Comments.post_id = ? AND Comments.parent_id IS NULL) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
       ORDER BY Comments.created_at DESC, Comments.id DESC
       LIMIT ?`
@@ -133,8 +135,9 @@ export async function getReplies(parentId, limit = 20, lastCommentCursor = null)
   let rows;
   if (!lastCommentCursor) {
     [rows] = await db.query(`
-      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE Comments.parent_id = ?
       ORDER BY Comments.created_at DESC, Comments.id DESC
       LIMIT ?`
@@ -143,8 +146,9 @@ export async function getReplies(parentId, limit = 20, lastCommentCursor = null)
   else {
     const { lastCreatedAt, lastId } = lastCommentCursor;
     [rows] = await db.query(`
-      SELECT Comments.id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id,  CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE (Comments.parent_id = ?) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
       ORDER BY Comments.created_at DESC, Comments.id DESC
       LIMIT ?`
@@ -296,8 +300,9 @@ export async function insertComment({ user_id, post_id, content, parent_id = nul
 
 export async function getCommentById(id) {
   const [rows] = await db.query(`
-    SELECT Comments.id, user_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+    SELECT Comments.id, CommentHearts.id AS heart_id, user_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
     INNER JOIN Users ON Comments.user_id = Users.id
+    LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
     WHERE Comments.id = ?`
     , [id]);
   return rows[0];
@@ -325,3 +330,68 @@ async function changeCounter(conn, postId, reactionType, delta) {
   }
 }
 
+
+
+export async function likeComment(user_id, comment_id) {
+  console.log(`likeComment(${user_id}, ${comment_id})`);
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [res] = await conn.execute(
+      `
+      INSERT IGNORE INTO CommentHearts (user_id, comment_id) VALUES (?, ?)`
+      ,
+      [user_id, comment_id]
+    );
+
+    if (res.affectedRows === 1) {
+      await conn.execute(
+        `UPDATE Comments
+      SET heart_count = heart_count + 1
+      WHERE id = ?`,
+        [comment_id]
+      );
+    }
+
+    await conn.commit();
+    return res.insertId;
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    await conn.release();
+  }
+}
+
+
+export async function unlikeComment(user_id, comment_id) {
+  console.log(`unlikeComment(${user_id}, ${comment_id})`);
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [res] = await conn.execute(
+      `
+      DELETE FROM CommentHearts
+      WHERE user_id = ? AND comment_id = ?
+      `,
+      [user_id, comment_id]
+    );
+
+    if (res.affectedRows === 1) {
+      await conn.execute(
+        `UPDATE Comments
+      SET heart_count = heart_count - 1
+      WHERE id = ?`,
+        [comment_id]
+      );
+    }
+
+    await conn.commit();
+    return res.insertId;
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    await conn.release();
+  }
+}

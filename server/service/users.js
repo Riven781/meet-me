@@ -1,5 +1,5 @@
 import e from 'express';
-import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction } from '../repository/users.js'
+import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment } from '../repository/users.js'
 
 export async function registerUser(user) {
   const { errors, isValid } = validateUser(user);
@@ -54,7 +54,8 @@ export async function loginUser(userData) {
     } else {
       return {
         ok: true,
-        userId: user.id
+        userId: user.id,
+        username: user.username
       }
     }
   } catch (error) {
@@ -291,7 +292,7 @@ function getCommentData(comment) {
     commentReplies: comment.reply_count,
     parentId: comment.parent_id,
     authorImage: comment.avatar_img_url ?? "/avatars/default-avatar.jpg",  //z bazy to pobrac trzeba bedzie
-    isLiked: false
+    isLiked: comment.heart_id ? true : false
   }
 }
 
@@ -354,4 +355,45 @@ function validateUser(user) {
     isValid: Object.keys(errors).length === 0
   };
 
+}
+
+export async function addCommentLike(userId, commentId) {
+  try {
+    console.log(`addCommentLike(${userId}, ${commentId})`);
+    const result = await likeComment(userId, commentId);
+    return {
+      ok: true,
+      code: "COMMENT_LIKED"
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "COMMENT_LIKE_FAILED",
+      errors: {
+        text: "Comment not liked"
+      }
+    }
+  }
+}
+
+export async function removeCommentLike(userId, commentId) {
+  try {
+    console.log(`removeCommentLike(${userId}, ${commentId})`);
+    const result = await unlikeComment(userId, commentId);
+    console.log(result);
+    return {
+      ok: true,
+      code: "COMMENT_UNLIKED"
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "COMMENT_UNLIKE_FAILED",
+      errors: {
+        text: "Comment not unliked"
+      }
+    }
+  }
 }

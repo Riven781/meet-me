@@ -240,7 +240,7 @@ async function loadComments(postId, postEl, firstLoad) {  //jeszcze end ktore us
 
 }
 
-async function loadReplies(postId,commentId, commentEl) {
+async function loadReplies(postId, commentId, commentEl) {
   let repliesByCommentId = appModel.repliesByCommentId[commentId];
 
   if (!repliesByCommentId) {
@@ -261,7 +261,7 @@ async function loadReplies(postId,commentId, commentEl) {
   const res = await fetch(url, {
     method: 'GET',
     headers: {
-      
+
     }
   });
   const data = await res.json();
@@ -675,12 +675,12 @@ function createComment(comment) {
 
   commentHeartsWrapper.appendChild(heartCommentCount);
 
-    const repliesContainer = document.createElement('section');
-    repliesContainer.classList.add('comments-replies');
-    repliesContainer.classList.add('comments');
-    commentContainer.appendChild(repliesContainer);
+  const repliesContainer = document.createElement('section');
+  repliesContainer.classList.add('comments-replies');
+  repliesContainer.classList.add('comments');
+  commentContainer.appendChild(repliesContainer);
 
-    console.log(`replies: ${comment.commentReplies}`);
+  console.log(`replies: ${comment.commentReplies}`);
 
   if (comment.commentReplies > 0) {
     const seeMoreRepliesBtn = document.createElement('button');
@@ -939,26 +939,41 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
     const commentId = replyEl ? replyEl.dataset.commentId : commentEl.dataset.commentId;
 
     const comment = appModel.commentsById[commentId];
+
     const counterEl = e.target.nextSibling;
 
+    if (comment.isLoading) return;
 
-    if (comment.isLiked) {
+    comment.isLoading = true;
 
-      e.target.textContent = '🖤';
-      counterEl.classList.remove('liked');
-      comment.isLiked = false;
-      comment.commentHearts--;
-      counterEl.textContent = comment.commentHearts;
 
-    }
-    else {
-      e.target.textContent = '❤️';
-      counterEl.classList.add('liked');
+    const prevLiked = comment.isLiked;
+    const prevCount = comment.commentHearts;
 
-      comment.isLiked = true;
-      comment.commentHearts++;
-      counterEl.textContent = comment.commentHearts;
-    }
+    const nextLiked = !comment.isLiked;
+    comment.isLiked = nextLiked;
+    comment.commentHearts += nextLiked ? 1 : -1;
+    e.target.textContent = nextLiked ? "❤️" : "🖤";
+    counterEl.classList.toggle("liked", nextLiked);
+    counterEl.textContent = comment.commentHearts;
+
+    const req = nextLiked ? likeComment(commentId) : unlikeComment(commentId);
+
+    console.log(`bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`);
+
+    req.catch(error => {
+      comment.isLiked = prevLiked;
+      comment.commentHearts = prevCount;
+      e.target.textContent = prevLiked ? "❤️" : "🖤";
+      counterEl.classList.toggle("liked", prevLiked);
+      counterEl.textContent = prevCount;
+      console.log(`error: ${error}`);
+    }).finally(() => {
+      console.log('finished');
+      comment.isLoading = false;
+    })
+
+
 
     //heartComment(commentId, commentEl);
   }
@@ -1033,16 +1048,16 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
           appModel.repliesByCommentId[parentId].items.push(data.comment);
           appModel.commentsById[data.comment.id] = data.comment;
-       
+
           const replyBefore = postEl.querySelector(`.comment-reply[data-comment-id="${appModel.postsById[postId].replyToComment.replyToCommentId}"]`);
           if (replyBefore) {
             replyContainer.insertBefore(newComment, replyBefore.nextSibling);
           }
-          else{
+          else {
             console.log('appending reply'); //TODO zmien zeby zawsze na końcu
             replyContainer.appendChild(newComment);
           }
-          
+
 
         }
         else {
@@ -1503,3 +1518,25 @@ function dislikePost(postId, postEl) {
 setInterval(() => {
   console.log('App model:', appModel.postsById[30].liked);
 }, 1000);*/
+
+
+
+async function likeComment(commentId) {
+  console.log(`likeComment(${commentId})`);
+  const res = await fetch(`/api/comments/${commentId}/like`, {
+    method: "PUT",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`PUT like failed: ${res.status}`);
+  return res;
+}
+
+async function unlikeComment(commentId) {
+  console.log(`unlikeComment(${commentId})`);
+  const res = await fetch(`/api/comments/${commentId}/like`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`DELETE like failed: ${res.status}`);
+  return res;
+}

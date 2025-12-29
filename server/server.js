@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike } from './service/users.js';
 import session from 'express-session';
 
 
@@ -56,7 +56,9 @@ protectedRouter.get('/posts', (req, res) => {
   res.sendFile(path.join(__dirname, '../protected/posts.html'));
 });
 
-protectedRouter.get('/profile', (req, res) => {
+protectedRouter.get('/profile/:username', (req, res) => {
+  const username = req.params.username;
+  const user = findUserByUsername(username);
   res.sendFile(path.join(__dirname, '../protected/profile.html'));
 });
 
@@ -93,6 +95,7 @@ app.post('/api/login', async (req, res) => {
           res.status(500).json({ code: "SESSION_ERROR" });
         }
         req.session.userId = result.userId;
+        req.session.username = result.username;
         res.status(200).json({
           ok: true
         });
@@ -204,6 +207,45 @@ app.get('/api/getComments', requireAuth, async (req, res) => {
   }
 });
 
+
+app.put("/api/comments/:commentId/like", requireAuth, async (req, res) => {
+  try {
+    console.log(`put`);
+    const commentId = Number(req.params.commentId);
+    const userId = req.session.userId;
+    
+    const result = await addCommentLike( userId, commentId);
+    
+    if (!result.ok) {
+      return res.status(400).json(result);
+    }
+    else{
+      res.sendStatus(204);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+
+app.delete("/api/comments/:commentId/like", requireAuth, async (req, res) => {
+  try {
+    console.log(`delete`);
+    const commentId = Number(req.params.commentId);
+    const userId = req.session.userId;
+    const result = await removeCommentLike( userId, commentId);
+    if (!result.ok) {
+      return res.status(400).json(result);
+    }
+    else{
+      res.sendStatus(204);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
