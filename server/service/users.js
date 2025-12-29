@@ -1,5 +1,5 @@
 import e from 'express';
-import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername } from '../repository/users.js'
+import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost } from '../repository/users.js'
 
 
 export async function registerUser(user) {
@@ -69,6 +69,38 @@ export async function loginUser(userData) {
       }
     }
   }
+}
+
+export async function getPostByPostId(postId) {
+  try{
+    const postData = await getPostById(postId);
+    if (postData) {
+      return {
+        ok: true,
+        postData: getPostData(postData),
+        code: "POST_FOUND"
+      }
+    }
+    else {
+      return {
+        ok: false,
+        code: "POST_NOT_FOUND",
+        errors: {
+          text: "Post not found"
+        }
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "POST_NOT_FOUND_ERROR",
+      errors: {
+        text: "Post not found"
+      }
+    }
+  }
+  
 }
 
 export async function createPost(userId, text) {
@@ -158,7 +190,7 @@ export async function getFeed(userId, limit = 20, lastPostCursor = null) {
 
 }
 
-export async function getPostByUser(userId, username, limit = 20, lastPostCursor = null) {
+export async function getPostsByUser(userId, username, limit = 20, lastPostCursor = null) {
   try {
     const data = await getPostsByUsername(userId, username, limit, lastPostCursor);
     if (data.posts.length > 0) {
@@ -354,7 +386,9 @@ function getPostData(post) {
     liked: post.liked ?? 0,
     authorImage: post.avatar_img_url ?? "/avatars/default-avatar.jpg",
     isCreatedByUser: post.isCreatedByUser ?? false,           //czy jest to post autorski,
-    liked: post.reaction ?? 0
+    liked: post.reaction ?? 0,
+    last_modified_at: post.last_modified_at,
+    edited: post.edited
   }
 }
 
@@ -467,6 +501,25 @@ export async function getUserByUsername(username) {
       code: "USER_NOT_FOUND",
       errors: {
         username: "User not found"
+      }
+    }
+  }
+}
+
+export async function editPost(postId, text) {
+  try {
+    const result = await updatePost(postId, text);
+    return {
+      ok: true,
+      code: "POST_EDITED"
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "POST_EDIT_FAILED",
+      errors: {
+        text: "Post not edited"
       }
     }
   }

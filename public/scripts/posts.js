@@ -484,6 +484,7 @@ function createPost(post) {
   link2.classList.add('author-name-link');
   link2.href = `/meet-me/profile/${post.authorName}`;
   postInformation.appendChild(link2);
+  
 
   const authorName = document.createElement('h2');
   authorName.classList.add('author-name');
@@ -493,12 +494,19 @@ function createPost(post) {
 
   const postDate = document.createElement('div');
   postDate.classList.add('post-date');
-  postDate.textContent = post.createdAt;
+  if (post.edited){
+    postDate.textContent = post.last_modified_at + ' (edited)';
+  }
+  else{
+    postDate.textContent = post.createdAt;
+  }
+  
   postInformation.appendChild(postDate);
 
   if(post.isCreatedByUser){
     const actionPostBtn = document.createElement('button');
     actionPostBtn.classList.add('action-btn');
+    actionPostBtn.classList.add('action-post-btn');
     postHeader.appendChild(actionPostBtn);
     actionPostBtn.textContent = '⫶';
   }
@@ -523,6 +531,23 @@ function createPost(post) {
   const postContentText = document.createElement('p');
   postContentText.textContent = post.postText;
   postContent.appendChild(postContentText);
+
+  const editingContainer = document.createElement('div');
+  editingContainer.classList.add('editing-container');
+
+  postContent.appendChild(editingContainer);
+
+  const discardBtn = document.createElement('button');
+  discardBtn.classList.add('editing-btn');
+  discardBtn.classList.add('discard-btn');
+  discardBtn.textContent = 'Discard';
+  editingContainer.appendChild(discardBtn);
+
+  const editBtn = document.createElement('button');
+  editBtn.classList.add('editing-btn');
+  editBtn.classList.add('save-edit-btn');
+  editBtn.textContent = 'Edit';
+  editingContainer.appendChild(editBtn);
 
   const postInteractions = document.createElement('div');
   postInteractions.classList.add('post-interactions');
@@ -845,7 +870,7 @@ function createReply(reply) {
   return commentReply;
 }
 
-
+const optionMenu = {};
 
 document.querySelector('.posts').addEventListener('click', async (e) => {
   if (e.target.matches(".comment-btn")) {
@@ -1178,9 +1203,128 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
 
   }
+  if(e.target.matches('.edit-btn')) {
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+    const postContent = postEl.querySelector('.post-content p');
+    postContent.contentEditable = true;
+    postContent.classList.add('editable');
+    const editingContainer = postEl.querySelector('.editing-container');
+
+    editingContainer.style.display = 'flex';
+    
+
+  }
+
+  if (e.target.matches('.save-edit-btn')) {
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+    
+    const res = await fetch(`/api/posts/${postId}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ content: postEl.querySelector('.post-content p').textContent }),
+    });
+    if (!res.ok) throw new Error(`PUT like failed: ${res.status}`);
+    
+    const data = await res.json();
+
+    const postData = data.postData;
+
+    console.log(data);
+
+    
+    
+    appModel.postsById[postId].postText = postData.postText;
+    const postContent = postEl.querySelector('.post-content p');
+    postContent.textContent = appModel.postsById[postId].postText;
+    postContent.contentEditable = false;
+    postContent.classList.remove('editable');
+
+    const postDate = postEl.querySelector('.post-date');
+
+    postDate.textContent = postData.last_modified_at + ' (edited)';
+
+    const editingContainer = postEl.querySelector('.editing-container');
+    editingContainer.style.display = 'none';
+  }
+
+  if (e.target.matches('.discard-btn')) {
+
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+    const postContent = postEl.querySelector('.post-content p');
+    postContent.contentEditable = false;
+    postContent.classList.remove('editable');
+    postContent.textContent = appModel.postsById[postId].postText;
+    const editingContainer = postEl.querySelector('.editing-container');
+    editingContainer.style.display = 'none';
+
+  }
+  
+
+  if (e.target.matches(".action-post-btn")) {
+
+    const actionBtn = e.target;
+    const postEl = e.target.closest(".post-container");
+    const postId = postEl.dataset.postId;
+
+    if (optionMenu.postId && optionMenu.postId === postId) {
+      removeOptionsMenu();
+      optionMenu.postId = null;
+      return;
+    }
+    else if (optionMenu.postId && optionMenu.postId !== postId) {
+      removeOptionsMenu();
+    }
+
+    optionMenu.postId = postId;
+    createOptionsMenu(postId, actionBtn);
+  } else{
+    if (optionMenu.postId) {
+      removeOptionsMenu();
+      optionMenu.postId = null;
+    }
+  }
+
 
 
 })
+
+
+function createOptionsMenu(postId, actionBtn) {
+  
+  const menuOptions = document.createElement('div');
+  menuOptions.classList.add('menu-options');
+
+  const editBtn = document.createElement('button');
+  editBtn.classList.add('option-btn');
+  editBtn.classList.add('edit-btn');
+
+  editBtn.textContent = 'Edit';
+  menuOptions.appendChild(editBtn);
+
+  const deleteBtn = document.createElement('button');
+
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.classList.add('delete-btn');
+  deleteBtn.classList.add('option-btn');
+  menuOptions.appendChild(deleteBtn);
+  const header = actionBtn.closest(".post-header");
+  header.appendChild(menuOptions);
+  
+
+  //actionBtn.nextSibling.appendChild(menuOptions);
+  
+}
+
+function removeOptionsMenu(){
+  
+  document.querySelector('.menu-options').remove();
+}
 
 function setClassesForReactionButtons(elementsToAddClass, elementsToRemoveClass) {
   if (elementsToAddClass) {
@@ -1603,3 +1747,5 @@ async function unlikeComment(commentId) {
   if (!res.ok) throw new Error(`DELETE like failed: ${res.status}`);
   return res;
 }
+
+

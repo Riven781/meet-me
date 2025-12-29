@@ -47,7 +47,7 @@ export async function insertPost({ user_id, text }) {
 
 export async function getPostById(id) {
   const [rows] = await db.query(`
-    SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reply_count FROM Posts
+    SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reply_count, last_modified_at, edited FROM Posts
     INNER JOIN Users ON Posts.user_id = Users.id
     WHERE Posts.id = ?`
     , [id]);
@@ -59,7 +59,7 @@ export async function getPosts(userId, limit = 20, lastPostCursor = null) {
   let rows;
   if (!lastPostCursor) {
     [rows] = await db.query(`
-      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count FROM Posts
+      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, last_modified_at, edited FROM Posts
       INNER JOIN Users ON Posts.user_id = Users.id
       LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
       WHERE Users.id != ?
@@ -70,7 +70,7 @@ export async function getPosts(userId, limit = 20, lastPostCursor = null) {
   else {
     const { lastCreatedAt, lastId } = lastPostCursor;
     [rows] = await db.query(`
-      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count FROM Posts
+      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, last_modified_at, edited FROM Posts
       INNER JOIN Users ON Posts.user_id = Users.id
       LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
       WHERE Users.id != ? AND (Posts.created_at < ? OR (Posts.created_at = ? AND Posts.id < ?))
@@ -101,7 +101,7 @@ export async function getPostsByUsername(userId, username, limit = 20, lastPostC
   let rows;
   if (!lastPostCursor){
     [rows] = await db.query(`
-     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser FROM Posts 
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser, edited, last_modified_at FROM Posts 
      INNER JOIN Users ON Posts.user_id = Users.id
      LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
      WHERE Users.username = ?
@@ -112,7 +112,7 @@ export async function getPostsByUsername(userId, username, limit = 20, lastPostC
   else{
     const { lastCreatedAt, lastId } = lastPostCursor;
     [rows] = await db.query(`
-     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser FROM Posts 
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser, edited, last_modified_at FROM Posts 
      INNER JOIN Users ON Posts.user_id = Users.id
      LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
      WHERE Users.username = ? AND (Posts.created_at < ? OR (Posts.created_at = ? AND Posts.id < ?))
@@ -432,6 +432,12 @@ export async function unlikeComment(user_id, comment_id) {
   } finally {
     await conn.release();
   }
+}
+
+
+export async function updatePost(postId, text) {
+  const [res] = await db.query(`UPDATE Posts SET text = ?, last_modified_at = NOW(), edited = TRUE WHERE id = ?`, [text, postId]);
+  return res.affectedRows === 1;
 }
 
 export async function findUserByUsername(username){

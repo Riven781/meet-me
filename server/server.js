@@ -2,7 +2,7 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostByUser } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost } from './service/users.js';
 import session from 'express-session';
 
 
@@ -138,7 +138,7 @@ app.get("/api/getPosts", requireAuth, async (req, res) => {
     let posts;
     if (req.query.username) {
 
-      posts = await getPostByUser(userId, req.query.username, limit, lastPostCursor);
+      posts = await getPostsByUser(userId, req.query.username, limit, lastPostCursor);
     }
     else {
       posts = await getFeed(userId, limit, lastPostCursor);
@@ -273,6 +273,46 @@ app.get("/api/profile/:username", requireAuth, async (req, res) => {
   }
 });
 
+
+app.patch("/api/posts/:postId", requireAuth, async (req, res) => {
+  try {
+    const postId = Number(req.params.postId);
+    const { content } = req.body;
+    const userId = req.session.userId;
+    const username = req.session.username;
+
+    try{
+      const post = await getPostByPostId(postId);
+      if (post.authorName !== username) {
+        return res.status(401).json({ code: "UNAUTHORIZED" });
+      }
+      if(!post.ok) {
+        return res.status(404).json({ code: "POST_NOT_FOUND" });
+      }
+    } 
+    catch (error) {
+      console.error(error);
+      return res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+    }
+    
+
+    const result = await editPost(postId, content);
+    if (!result.ok) {
+      return res.status(400).json(result);
+    }
+
+    const afterEditPost = await getPostByPostId(postId);
+
+    if (!afterEditPost.ok) {
+      return res.status(404).json({ code: "POST_NOT_FOUND" });
+    }
+    res.status(200).json(afterEditPost);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
 
 
 
