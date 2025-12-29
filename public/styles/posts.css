@@ -633,6 +633,15 @@ h1 {
   height: 1px;
 }
 
+.author-name-link{
+  text-decoration: none;
+  color: black;
+}
+
+.author-name-link:hover{
+  text-decoration: underline;
+}
+
 @media screen and (max-width: 684px) {
   main {
     padding: 10px 0;

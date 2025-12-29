@@ -101,24 +101,24 @@ export async function getPostsByUsername(userId, username, limit = 20, lastPostC
   let rows;
   if (!lastPostCursor){
     [rows] = await db.query(`
-     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count FROM Posts 
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser FROM Posts 
      INNER JOIN Users ON Posts.user_id = Users.id
      LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
      WHERE Users.username = ?
      ORDER BY Posts.created_at DESC, Posts.id DESC
      LIMIT ?`
-     , [userId, username, limit]);
+     , [userId, userId, username, limit]);
   }
   else{
     const { lastCreatedAt, lastId } = lastPostCursor;
     [rows] = await db.query(`
-     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count FROM Posts 
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser FROM Posts 
      INNER JOIN Users ON Posts.user_id = Users.id
      LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
      WHERE Users.username = ? AND (Posts.created_at < ? OR (Posts.created_at = ? AND Posts.id < ?))
      ORDER BY Posts.created_at DESC, Posts.id DESC
      LIMIT ?`
-     , [userId, username, lastCreatedAt, lastCreatedAt, lastId, limit]);
+     , [userId, userId, username, lastCreatedAt, lastCreatedAt, lastId, limit]);
   }
 
   const nextPostCursor = rows.length === limit ? encodeCursor({

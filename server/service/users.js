@@ -130,7 +130,7 @@ export async function getFeed(userId, limit = 20, lastPostCursor = null) {
   try {
     const data = await getPosts(userId, limit, lastPostCursor);
     if (data.posts.length > 0) {
-      const formattedPosts = data.posts.map(post => getPostData(post, false));
+      const formattedPosts = data.posts.map(post => getPostData(post));
       return {
         ok: true,
         posts: formattedPosts,
@@ -162,7 +162,7 @@ export async function getPostByUser(userId, username, limit = 20, lastPostCursor
   try {
     const data = await getPostsByUsername(userId, username, limit, lastPostCursor);
     if (data.posts.length > 0) {
-      const formattedPosts = data.posts.map(post => getPostData(post, false));
+      const formattedPosts = data.posts.map(post => getPostData(post));
       return {
         ok: true,
         posts: formattedPosts,
@@ -339,7 +339,7 @@ function getProfileData(user){
 }
 
 
-function getPostData(post, isCreatedByUser) {
+function getPostData(post) {
   return {
     id: post.id,
     authorName: post.username,
@@ -353,7 +353,7 @@ function getPostData(post, isCreatedByUser) {
     saved: post.saved ?? false,
     liked: post.liked ?? 0,
     authorImage: post.avatar_img_url ?? "/avatars/default-avatar.jpg",
-    isCreatedByUser: isCreatedByUser,           //czy jest to post autorski,
+    isCreatedByUser: post.isCreatedByUser ?? false,           //czy jest to post autorski,
     liked: post.reaction ?? 0
   }
 }

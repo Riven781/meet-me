@@ -1,3 +1,4 @@
+
 const textarea = document.getElementById("post-text");
 const postBtn = document.getElementById("post-btn");
 const commentBtn = document.getElementsByClassName("comment-btn");
@@ -464,32 +465,50 @@ function createPost(post) {
   authorContainer.classList.add('author-container');
   postHeader.appendChild(authorContainer);
 
+  const link = document.createElement('a');
+  link.href = `/meet-me/profile/${post.authorName}`;
+  authorContainer.appendChild(link);
+
   const authorImage = document.createElement('img');
   authorImage.src = post.authorImage;
   authorImage.alt = "image";
   authorImage.classList.add('author-image');
-  authorContainer.appendChild(authorImage);
+  link.appendChild(authorImage);
+  //authorContainer.appendChild(authorImage);
 
   const postInformation = document.createElement('div');
   postInformation.classList.add('post-information');
   authorContainer.appendChild(postInformation);
 
+  const link2 = document.createElement('a');
+  link2.classList.add('author-name-link');
+  link2.href = `/meet-me/profile/${post.authorName}`;
+  postInformation.appendChild(link2);
+
   const authorName = document.createElement('h2');
   authorName.classList.add('author-name');
   authorName.textContent = post.authorName;
-  postInformation.appendChild(authorName);
+  link2.appendChild(authorName);
+  //postInformation.appendChild(authorName);
 
   const postDate = document.createElement('div');
   postDate.classList.add('post-date');
   postDate.textContent = post.createdAt;
   postInformation.appendChild(postDate);
 
-  if (!post.observed) {
+  if(post.isCreatedByUser){
+    const actionPostBtn = document.createElement('button');
+    actionPostBtn.classList.add('action-btn');
+    postHeader.appendChild(actionPostBtn);
+    actionPostBtn.textContent = '⫶';
+  }
+
+  /*if (!post.observed) {
     const addBtn = document.createElement('button');
     addBtn.classList.add('add-btn');
     postHeader.appendChild(addBtn);
     addBtn.textContent = '➕';
-  }
+  }*/
 
 
 
@@ -634,19 +653,32 @@ function createComment(comment) {
   commentEl.classList.add('comment');
   commentContainer.appendChild(commentEl);
 
+  const link = document.createElement('a');
+  link.href = `/meet-me/profile/${comment.authorName}`;
+  commentEl.appendChild(link);
+
   const commentAuthorImage = document.createElement('img');
   commentAuthorImage.classList.add('comment-author-image');
   commentAuthorImage.src = comment.authorImage;
-  commentEl.appendChild(commentAuthorImage);
+  link.appendChild(commentAuthorImage);
+  //commentEl.appendChild(commentAuthorImage);
 
   const commentData = document.createElement('div');
   commentData.classList.add('comment-data');
   commentEl.appendChild(commentData);
 
+  const link2 = document.createElement('a');
+  link2.href = `/meet-me/profile/${comment.authorName}`;
+  link2.classList.add('author-name-link');
+  commentData.appendChild(link2);
+
   const commentAuthorName = document.createElement('h2');
   commentAuthorName.classList.add('comment-author-name');
   commentAuthorName.textContent = comment.authorName;
-  commentData.appendChild(commentAuthorName);
+  link2.appendChild(commentAuthorName);
+  //commentData.appendChild(commentAuthorName);
+
+
 
   const commentContent = document.createElement('div');
   commentContent.classList.add('comment-content');
@@ -739,19 +771,31 @@ function createReply(reply) {
   commentReply.classList.add('comment');
   commentReply.dataset.commentId = reply.id;
 
+  const link = document.createElement('a');
+  link.href = `/meet-me/profile/${reply.authorName}`;
+  commentReply.appendChild(link);
+
   const commentAuthorImage = document.createElement('img');
   commentAuthorImage.classList.add('comment-author-image');
   commentAuthorImage.src = reply.authorImage;
-  commentReply.appendChild(commentAuthorImage);
+  link.appendChild(commentAuthorImage);
+  //commentReply.appendChild(commentAuthorImage);
+
 
   const commentData = document.createElement('div');
   commentData.classList.add('comment-data');
   commentReply.appendChild(commentData);
 
+  const link2 = document.createElement('a');
+  link2.href = `/meet-me/profile/${reply.authorName}`;
+  link2.classList.add('author-name-link');
+  commentData.appendChild(link2);
+
   const commentAuthorName = document.createElement('h2');
   commentAuthorName.classList.add('comment-author-name');
   commentAuthorName.textContent = reply.authorName;
-  commentData.appendChild(commentAuthorName);
+  link2.appendChild(commentAuthorName);
+  //commentData.appendChild(commentAuthorName);
 
   const commentContent = document.createElement('div');
   commentContent.classList.add('comment-content');
