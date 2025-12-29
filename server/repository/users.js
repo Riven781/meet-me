@@ -18,13 +18,13 @@ export async function createUser({ username, email, password, first_name, last_n
 }
 
 export async function getUserByEmailAndPassword(email, password) {
-  const [rows] = await db.query('SELECT id FROM Users WHERE email = ? AND password = ?', [email, password]);
+  const [rows] = await db.query('SELECT id, username FROM Users WHERE email = ? AND password = ?', [email, password]);
   console.log(rows);
   return rows[0];
 }
 
 export async function getUserByUsernameAndPassword(username, password) {
-  const [rows] = await db.query('SELECT id FROM Users WHERE username = ? AND password = ?', [username, password]);
+  const [rows] = await db.query('SELECT id, username FROM Users WHERE username = ? AND password = ?', [username, password]);
   console.log(rows);
   return rows[0];
 }
@@ -338,7 +338,7 @@ export async function insertComment({ user_id, post_id, content, parent_id = nul
 
 export async function getCommentById(id) {
   const [rows] = await db.query(`
-    SELECT Comments.id, CommentHearts.id AS heart_id, user_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+    SELECT Comments.id, CommentHearts.id AS heart_id, Comments.user_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
     INNER JOIN Users ON Comments.user_id = Users.id
     LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
     WHERE Comments.id = ?`

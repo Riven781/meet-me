@@ -36,6 +36,7 @@ header {
   justify-content: space-between;
   align-items: center;
   color: rgb(255, 255, 255);
+  position: relative;
 
 
 }
@@ -684,6 +685,14 @@ h1 {
   color: rgb(0, 0, 0);
 }
 
+.delete-btn{
+  color: rgb(255, 0, 0);
+}
+
+.option-btn:hover{
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
 .editable{
   outline: 1px solid rgba(0, 0, 0, 0.932);
   box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
@@ -721,6 +730,39 @@ h1 {
 .discard-btn{
   background-color: rgb(95, 0, 0);
 }
+
+.account-menu{
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.75);
+  border-radius: 5px;
+  padding: 5px;
+  display: none;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 1;
+  background-color: rgb(0, 0, 0);
+}
+
+.account-option{
+  text-align: left;
+  background-color: transparent;
+  border: 1px solid rgba(104, 98, 98, 0.836);
+ 
+  text-decoration: none;
+  cursor: pointer;
+  padding: 5px;
+  font-size: clamp(10px, 5.0vw, 14px);
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+}
+
+.account-option:hover{
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 
 @media screen and (max-width: 684px) {
   main {

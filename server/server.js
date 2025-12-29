@@ -96,6 +96,16 @@ app.post('/api/login', async (req, res) => {
         }
         req.session.userId = result.userId;
         req.session.username = result.username;
+
+
+
+        res.cookie('username', result.username, {
+          maxAge: 24 * 60 * 60 * 1000,  //podaje sie w milisekundach (dla przeglądarki)
+          httpOnly: false,
+          secure: false,
+          sameSite: 'lax'
+        });
+
         res.status(200).json({
           ok: true
         });
@@ -281,20 +291,20 @@ app.patch("/api/posts/:postId", requireAuth, async (req, res) => {
     const userId = req.session.userId;
     const username = req.session.username;
 
-    try{
-      const post = await getPostByPostId(postId);
-      if (post.authorName !== username) {
+    try {
+      const data = await getPostByPostId(postId);
+      if (data.postData.authorName !== username) {
         return res.status(401).json({ code: "UNAUTHORIZED" });
       }
-      if(!post.ok) {
+      if (!data.ok) {
         return res.status(404).json({ code: "POST_NOT_FOUND" });
       }
-    } 
+    }
     catch (error) {
       console.error(error);
       return res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
     }
-    
+
 
     const result = await editPost(postId, content);
     if (!result.ok) {
@@ -319,8 +329,9 @@ app.delete("/api/posts/:postId", requireAuth, async (req, res) => {
     const postId = Number(req.params.postId);
     console.log(`postId: ${postId}`);
     const username = req.session.username;
-    const post = await getPostByPostId(postId);
-    if (post.authorName !== username) {
+    const data = await getPostByPostId(postId);
+    if (data.postData.authorName !== username) {
+      console.log(`post.authorName: ${data.postData.authorName}, username: ${username}`);
       return res.status(404).json({ code: "UNAUTHORIZED" });
     }
     const result = await deletePost(postId);
@@ -333,6 +344,15 @@ app.delete("/api/posts/:postId", requireAuth, async (req, res) => {
     console.error(error);
     res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
   }
+});
+
+app.post("/api/logout", (req, res) => {
+   req.session.destroy(() => 
+    { 
+    res.clearCookie("username", { path: "/" }); 
+    res.clearCookie("meet-me-session", { path: "/" });
+    res.sendStatus(200); 
+  }); 
 });
 
 

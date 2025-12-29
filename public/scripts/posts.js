@@ -2,7 +2,7 @@
 const textarea = document.getElementById("post-text");
 const postBtn = document.getElementById("post-btn");
 const commentBtn = document.getElementsByClassName("comment-btn");
-
+const accountBtn = document.getElementById("account-btn");
 let username = isProfileMode();
 
 function isProfileMode() {
@@ -21,7 +21,61 @@ function isProfileMode() {
   }
 }
 
+
+accountBtn.addEventListener("click", () => {
+  const accountMenu = document.querySelector(".account-menu");
+  console.log(accountMenu);
+
+  const isHidden = getComputedStyle(accountMenu).display === "none";
+
+  accountMenu.style.display = isHidden ? "flex" : "none";
+
+});
+
+console.log(`document.cookie tttt = ${document.cookie}`);
+
+function getUserFromCookie() {
+  const cookie = document.cookie;
+
+  return cookie.split('=')[1];
+}
+
+
+
+
+
+const accountLink = document.querySelector(".account-link");
+accountLink.href = "/meet-me/profile/" + getUserFromCookie();
+
+accountLink.addEventListener("click", () => {
+  const accountMenu = document.querySelector(".account-menu");
+  accountMenu.style.display = "none";
+});
+
+const logoutBtn = document.querySelector(".logout-btn");
+
+logoutBtn.addEventListener("click", async () => {
+  const res = await fetch("/api/logout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  console.log(` res = ${res}`);
+
+  if (res.ok) {
+    console.log("logout ok");
+    window.location.href = "/meet-me/start";
+  }
+  
+})
+
+
 const maxHeight = 300;
+
+
+
 
 postBtn.parentElement.classList.toggle('show', textarea.value.trim() !== '');
 
@@ -1231,9 +1285,9 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
         delete appModel.commentsByPostId[postId];
       }
-
+      optionMenu.postId = null;
     }
-    optionMenu.postId = null;
+    
 
   }
 
@@ -1778,5 +1832,10 @@ async function unlikeComment(commentId) {
   if (!res.ok) throw new Error(`DELETE like failed: ${res.status}`);
   return res;
 }
+
+
+
+
+
 
 

@@ -41,9 +41,11 @@ export async function loginUser(userData) {
     let user;
     if (usernameOrEmail.includes('@')) {
       user = await getUserByEmailAndPassword(usernameOrEmail, password);
+      
     } else {
       user = await getUserByUsernameAndPassword(usernameOrEmail, password);
     }
+    console.log(user);
     if (!user) {
       return {
         ok: false,
@@ -74,6 +76,7 @@ export async function loginUser(userData) {
 export async function getPostByPostId(postId) {
   try{
     const postData = await getPostById(postId);
+    console.log(` postData: ${JSON.stringify(postData)}`);
     if (postData) {
       return {
         ok: true,
