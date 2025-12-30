@@ -229,9 +229,9 @@ export async function getPostsByUser(userId, username, limit = 20, lastPostCurso
 }
 
 
-export async function getCommentsForPost(postId, limit = 20, lastCommentCursor = null) {
+export async function getCommentsForPost( userId, postId, limit = 20, lastCommentCursor = null) {
   try {
-    const data = await getComments(postId, limit, lastCommentCursor);
+    const data = await getComments(postId, userId, limit, lastCommentCursor);
     const rows = data.comments;
     if (rows.length > 0) {
 
@@ -262,9 +262,9 @@ export async function getCommentsForPost(postId, limit = 20, lastCommentCursor =
   }
 }
 
-export async function getRepliesForComment(parentId, limit = 20, lastCommentCursor = null) {
+export async function getRepliesForComment(userId, parentId, limit = 20, lastCommentCursor = null) {
   try {
-    const data = await getReplies(parentId, limit, lastCommentCursor);
+    const data = await getReplies(userId, parentId, limit, lastCommentCursor);
     const rows = data.comments;
     if (rows.length > 0) {
 

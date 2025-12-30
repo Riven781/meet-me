@@ -230,6 +230,7 @@ app.get('/api/getComments', requireAuth, async (req, res) => {
   try {
     const postId = Number(req.query.postId);
     const limit = Number(req.query.limit) || 20;
+    const userId = req.session.userId;
     let lastCommentCursor = null;
     if (req.query.lastCommentCursor) {
       lastCommentCursor = decodeCursor(req.query.lastCommentCursor);
@@ -237,12 +238,12 @@ app.get('/api/getComments', requireAuth, async (req, res) => {
     if (req.query.parentId) {
       const parentId = Number(req.query.parentId);
       console.log(` parentId: ${parentId}`);
-      const comments = await getRepliesForComment(parentId, limit, lastCommentCursor);
+      const comments = await getRepliesForComment(parentId,userId, limit, lastCommentCursor);
       console.log(` comments: ${JSON.stringify(comments)}`);
       res.status(200).json(comments);
       return;
     } else {
-      const comments = await getCommentsForPost(postId, limit, lastCommentCursor);
+      const comments = await getCommentsForPost( userId, postId, limit, lastCommentCursor);
       res.status(200).json(comments);
     }
 

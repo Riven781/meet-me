@@ -134,28 +134,28 @@ export async function getPostsByUsername(userId, username, limit = 20, lastPostC
 
 }
 
-export async function getComments(postId, limit = 20, lastCommentCursor = null) {
+export async function getComments(postId, userId, limit = 20, lastCommentCursor = null) {
   let rows;
   if (!lastCommentCursor) {
     [rows] = await db.query(`
       SELECT Comments.id, CommentHearts.id AS heart_id, username, content, avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
-      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id AND CommentHearts.user_id = ?
       WHERE Comments.post_id = ? AND Comments.parent_id IS NULL
       ORDER BY Comments.created_at DESC, Comments.id DESC
       LIMIT ?`
-      , [postId, limit]);
+      , [ userId, postId, limit]);
   }
   else {
     const { lastCreatedAt, lastId } = lastCommentCursor;
     [rows] = await db.query(`
       SELECT Comments.id, CommentHearts.id AS heart_id, username, content, avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
-      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id AND CommentHearts.user_id = ?
       WHERE (Comments.post_id = ? AND Comments.parent_id IS NULL) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
       ORDER BY Comments.created_at DESC, Comments.id DESC
       LIMIT ?`
-      , [postId, lastCreatedAt, lastCreatedAt, lastId, limit]);
+      , [userId, postId, lastCreatedAt, lastCreatedAt, lastId, limit]);
   }
 
   const nextCommentCursor = rows.length === limit ? encodeCursor({
@@ -169,29 +169,31 @@ export async function getComments(postId, limit = 20, lastCommentCursor = null) 
   };
 }
 
-export async function getReplies(parentId, limit = 20, lastCommentCursor = null) {
+export async function getReplies(parentId, userId, limit = 20, lastCommentCursor = null) {
   let rows;
   if (!lastCommentCursor) {
     [rows] = await db.query(`
       SELECT Comments.id, CommentHearts.id AS heart_id, username, content,avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
-      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id AND CommentHearts.user_id = ?
       WHERE Comments.parent_id = ?
-      ORDER BY Comments.created_at DESC, Comments.id DESC
+      ORDER BY Comments.created_at ASC, Comments.id ASC
       LIMIT ?`
-      , [parentId, limit]);
+      , [userId, parentId, limit]);
   }
   else {
     const { lastCreatedAt, lastId } = lastCommentCursor;
     [rows] = await db.query(`
       SELECT Comments.id,  CommentHearts.id AS heart_id, username, content, avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
-      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
-      WHERE (Comments.parent_id = ?) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
-      ORDER BY Comments.created_at DESC, Comments.id DESC
+      LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id AND CommentHearts.user_id = ?
+      WHERE (Comments.parent_id = ?) AND (Comments.created_at > ? OR (Comments.created_at = ? AND Comments.id > ?))
+      ORDER BY Comments.created_at ASC, Comments.id ASC
       LIMIT ?`
-      , [parentId, lastCreatedAt, lastCreatedAt, lastId, limit]);
+      , [userId, parentId, lastCreatedAt, lastCreatedAt, lastId, limit]);
   }
+
+  console.log(`oooooo rows: ${JSON.stringify(rows)}`);
 
   const nextCommentCursor = rows.length === limit ? encodeCursor({
     lastCreatedAt: rows[rows.length - 1].created_at,
@@ -199,7 +201,7 @@ export async function getReplies(parentId, limit = 20, lastCommentCursor = null)
   }) : null;
 
   return {
-    comments: rows.reverse(),
+    comments: rows,
     nextCommentCursor
   };
 }
