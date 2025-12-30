@@ -1,5 +1,5 @@
 import e from 'express';
-import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost, deletePostById } from '../repository/users.js'
+import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost, deletePostById, saveAvatarImgUrl, saveBackgroundImgUrl } from '../repository/users.js'
 
 
 
@@ -554,4 +554,34 @@ export async function editPost(postId, text) {
       }
     }
   }
+}
+
+
+export async function saveImageUrl(userId, imageUrl, imageType){
+  try{
+    if (imageType === "avatar") {
+      const result = await saveAvatarImgUrl(userId, imageUrl);
+      return {
+        ok: true,
+        code: "AVATAR_IMAGE_SAVED"
+      }
+    }
+    else if (imageType === "background") {
+      const result = await saveBackgroundImgUrl(userId, imageUrl);
+      return {
+        ok: true,
+        code: "BACKGROUND_IMAGE_SAVED"
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      ok: false,
+      code: "IMAGE_SAVE_FAILED",
+      errors: {
+        text: "Image not saved"
+      }
+    }
+  }
+
 }

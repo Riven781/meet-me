@@ -2,8 +2,9 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
 import mysql from 'mysql2';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost, deletePost } from './service/users.js';
+import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost, deletePost, saveImageUrl } from './service/users.js';
 import session from 'express-session';
+import multer from 'multer';
 
 
 const app = express();
@@ -13,6 +14,30 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    console.log(`req.path: ${req.path}`);
+    const pathStart = '/api/profile/upload';
+  if (req.path === pathStart + '/avatar'){
+    cb(null, path.join(__dirname, '../public/images/avatars'));
+  }
+  else if (req.path === pathStart + '/background'){
+    cb(null, path.join(__dirname, '../public/images/backgrounds'));
+  }
+  else{
+    cb(null, path.join(__dirname, '../public/images/unknown'));
+  }
+    //cb(null, path.join(__dirname, '../public/images/avatars'));
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+    console.log(`uniqueName: ${uniqueName}`);
+    console.log(`file.originalname: ${file.originalname}`);
+    cb(null, uniqueName);
+  }
+})
+
+const upload = multer({ storage: storage });
 
 
 app.use("/avatars", express.static(path.join(__dirname, "../public/images/avatars")));
@@ -355,6 +380,22 @@ app.post("/api/logout", (req, res) => {
     res.clearCookie("meet-me-session", { path: "/" });
     res.sendStatus(200); 
   }); 
+});
+
+app.post("/api/profile/upload/avatar", requireAuth, upload.single('image'), async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const result = await saveImageUrl(userId, '/avatars/' + req.file.filename, "avatar");
+    if (!result.ok) {
+      return res.status(400).json(result);
+    }
+    res.sendStatus(204);
+
+    console.log(`req.file: ${JSON.stringify(req.file)}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
 });
 
 

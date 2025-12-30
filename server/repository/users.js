@@ -47,7 +47,7 @@ export async function insertPost({ user_id, text }) {
 
 export async function getPostById(id, userId) {
   const [rows] = await db.query(`
-    SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reply_count, last_modified_at, Users.id = ? AS isCreatedByUser, edited FROM Posts
+    SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reply_count, last_modified_at, avatar_img_url, Users.id = ? AS isCreatedByUser, edited FROM Posts
     INNER JOIN Users ON Posts.user_id = Users.id
     WHERE Posts.id = ?`
     , [userId, id]);
@@ -59,7 +59,7 @@ export async function getPosts(userId, limit = 20, lastPostCursor = null) {
   let rows;
   if (!lastPostCursor) {
     [rows] = await db.query(`
-      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, last_modified_at, edited FROM Posts
+      SELECT Posts.id, username,  text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, avatar_img_url, last_modified_at, edited FROM Posts
       INNER JOIN Users ON Posts.user_id = Users.id
       LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
       WHERE Users.id != ?
@@ -70,7 +70,7 @@ export async function getPosts(userId, limit = 20, lastPostCursor = null) {
   else {
     const { lastCreatedAt, lastId } = lastPostCursor;
     [rows] = await db.query(`
-      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, last_modified_at, edited FROM Posts
+      SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, avatar_img_url, reaction, reply_count, last_modified_at, edited FROM Posts
       INNER JOIN Users ON Posts.user_id = Users.id
       LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
       WHERE Users.id != ? AND (Posts.created_at < ? OR (Posts.created_at = ? AND Posts.id < ?))
@@ -101,7 +101,7 @@ export async function getPostsByUsername(userId, username, limit = 20, lastPostC
   let rows;
   if (!lastPostCursor){
     [rows] = await db.query(`
-     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser, edited, last_modified_at FROM Posts 
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, avatar_img_url, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser, edited, last_modified_at FROM Posts 
      INNER JOIN Users ON Posts.user_id = Users.id
      LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
      WHERE Users.username = ?
@@ -112,7 +112,7 @@ export async function getPostsByUsername(userId, username, limit = 20, lastPostC
   else{
     const { lastCreatedAt, lastId } = lastPostCursor;
     [rows] = await db.query(`
-     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser, edited, last_modified_at FROM Posts 
+     SELECT Posts.id, username, text, Posts.created_at, like_count, dislike_count, avatar_img_url, heart_count, reaction, reply_count, Users.id = ? AS isCreatedByUser, edited, last_modified_at FROM Posts 
      INNER JOIN Users ON Posts.user_id = Users.id
      LEFT JOIN PostsReactions ON Posts.id = PostsReactions.post_id AND PostsReactions.user_id = ?
      WHERE Users.username = ? AND (Posts.created_at < ? OR (Posts.created_at = ? AND Posts.id < ?))
@@ -138,7 +138,7 @@ export async function getComments(postId, limit = 20, lastCommentCursor = null) 
   let rows;
   if (!lastCommentCursor) {
     [rows] = await db.query(`
-      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
       LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE Comments.post_id = ? AND Comments.parent_id IS NULL
@@ -149,7 +149,7 @@ export async function getComments(postId, limit = 20, lastCommentCursor = null) 
   else {
     const { lastCreatedAt, lastId } = lastCommentCursor;
     [rows] = await db.query(`
-      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
       LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE (Comments.post_id = ? AND Comments.parent_id IS NULL) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
@@ -173,7 +173,7 @@ export async function getReplies(parentId, limit = 20, lastCommentCursor = null)
   let rows;
   if (!lastCommentCursor) {
     [rows] = await db.query(`
-      SELECT Comments.id, CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id, CommentHearts.id AS heart_id, username, content,avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
       LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE Comments.parent_id = ?
@@ -184,7 +184,7 @@ export async function getReplies(parentId, limit = 20, lastCommentCursor = null)
   else {
     const { lastCreatedAt, lastId } = lastCommentCursor;
     [rows] = await db.query(`
-      SELECT Comments.id,  CommentHearts.id AS heart_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+      SELECT Comments.id,  CommentHearts.id AS heart_id, username, content, avatar_img_url, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
       INNER JOIN Users ON Comments.user_id = Users.id
       LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
       WHERE (Comments.parent_id = ?) AND (Comments.created_at < ? OR (Comments.created_at = ? AND Comments.id < ?))
@@ -338,7 +338,7 @@ export async function insertComment({ user_id, post_id, content, parent_id = nul
 
 export async function getCommentById(id) {
   const [rows] = await db.query(`
-    SELECT Comments.id, CommentHearts.id AS heart_id, Comments.user_id, username, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
+    SELECT Comments.id, CommentHearts.id AS heart_id, Comments.user_id, username, avatar_img_url, content, Comments.created_at, heart_count, reply_count, parent_id  FROM Comments
     INNER JOIN Users ON Comments.user_id = Users.id
     LEFT JOIN CommentHearts ON Comments.id = CommentHearts.comment_id
     WHERE Comments.id = ?`
@@ -448,4 +448,14 @@ export async function updatePost(postId, text) {
 export async function findUserByUsername(username){
   const [rows] = await db.query('SELECT id, username, avatar_img_url, background_img_url FROM Users WHERE username = ?', [username]);
   return rows[0];
+}
+
+export async function saveAvatarImgUrl(userId, imageUrl){
+  const [res] = await db.query(`UPDATE Users SET avatar_img_url = ? WHERE id = ?`, [imageUrl, userId]);
+  return res.affectedRows === 1;
+}
+
+export async function saveBackgroundImgUrl(userId, imageUrl){
+  const [res] = await db.query(`UPDATE Users SET background_img_url = ? WHERE id = ?`, [imageUrl, userId]);
+  return res.affectedRows === 1;
 }

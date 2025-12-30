@@ -22,21 +22,32 @@
       </h1>
     </div>
 
+
     <button id="account-btn" class="account header-btn">
       👤
     </button>
 
-   <div class="account-menu">
+    <div class="account-menu">
       <a class="account-option account-link" href="/meet-me/profile/">Profile</a>
       <button class="account-option logout-btn">Logout</button>
     </div>
+
+
+
   </header>
 
   <div class="account-header">
     <section class="profile-information">
       <div class="profile-background">
-        <img class="author-image-large" src="/images/default-avatar.jpg" alt="image">
+
+        <div class="profile-avatar">
+          <img class="author-image-large" src="/images/default-avatar.jpg" alt="image">
+          <button class="set-img-btn">📷</button>
+        </div>
+
       </div>
+
+
       <div class="profile-header">
 
 
@@ -81,6 +92,24 @@
   <footer>
 
   </footer>
+
+  <section class="set-img-container">
+    
+    <div class="load-img-wrapper">
+      <button id="cancel-btn">×</button>
+      <h2>
+        Choose image
+      </h2>
+      <img id="img-to-set" class="author-image-large" src="/images/default-avatar.jpg">
+      <form id="upload-form">
+        <input type="file" name="image" id="file-input" accept="image/*">
+        <button id="upload-btn" type="submit">Upload</button>
+      </form>
+    </div>
+
+  </section>
+
+
 
 
 
