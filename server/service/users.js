@@ -397,7 +397,7 @@ function getProfileData(user){
   return{
     username: user.username,
     authorImage: user.avatar_img_url ?? "/avatars/default-avatar.jpg",
-    backgroundImage: user.background_img_url ?? "/images/default-avatar.jpg",
+    backgroundImage: user.background_img_url ?? null,
   }
 }
 

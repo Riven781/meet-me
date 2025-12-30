@@ -50,6 +50,8 @@ main {
 
 
 
+
+
 .profile-information {
   display: flex;
   flex-direction: column;
@@ -69,9 +71,8 @@ main {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 200px;
+  height: 200px;
   width: 100%;
-  padding: 10px;
 
   border-radius: 5px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.75);
@@ -107,6 +108,10 @@ main {
   height: 100%;
 }
 
+.set-img-btn.background {
+  border-radius: 0;
+}
+
 .set-img-btn:hover {
   opacity: 1;
 }
@@ -123,7 +128,7 @@ main {
   place-items: center;
   z-index: 2;
   overflow: auto;
-  
+
 }
 
 #cancel-btn {
@@ -143,7 +148,7 @@ main {
 
 
 
-.load-img-wrapper{
+.load-img-wrapper {
   display: flex;
   position: relative;
   flex-direction: column;
@@ -156,13 +161,30 @@ main {
   align-items: center;
 }
 
-
-#img-to-set{
+#img-to-set {
   display: none;
-  outline: 3px  solid rgb(0, 0, 0);
+  outline: 3px solid rgb(0, 0, 0);
   box-shadow: none;
+}
+
+
+
+.background-img {
+  box-shadow: none;
+  width: clamp(80px, 15.0vw, 150px);
+  height: clamp(40px, 10.0vw, 100px);
+  object-fit: cover;
 
 }
+
+.background-img-large {
+  box-shadow: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
 
 .author-image-large {
   width: clamp(80px, 15.0vw, 150px);
@@ -211,7 +233,7 @@ main {
   cursor: pointer;
 }
 
-#upload-form{
+#upload-form {
   display: flex;
   justify-content: center;
   align-items: center;

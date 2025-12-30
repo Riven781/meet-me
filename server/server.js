@@ -41,6 +41,7 @@ const upload = multer({ storage: storage });
 
 
 app.use("/avatars", express.static(path.join(__dirname, "../public/images/avatars")));
+app.use("/backgrounds", express.static(path.join(__dirname, "../public/images/backgrounds")));
 app.use(express.static(path.join(__dirname, '../public')));
 
 
@@ -386,6 +387,23 @@ app.post("/api/profile/upload/avatar", requireAuth, upload.single('image'), asyn
   try {
     const userId = req.session.userId;
     const result = await saveImageUrl(userId, '/avatars/' + req.file.filename, "avatar");
+    if (!result.ok) {
+      return res.status(400).json(result);
+    }
+    res.sendStatus(204);
+
+    console.log(`req.file: ${JSON.stringify(req.file)}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
+  }
+});
+
+
+app.post("/api/profile/upload/background", requireAuth, upload.single('image'), async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const result = await saveImageUrl(userId, '/backgrounds/' + req.file.filename, "background");
     if (!result.ok) {
       return res.status(400).json(result);
     }

@@ -39,10 +39,12 @@
   <div class="account-header">
     <section class="profile-information">
       <div class="profile-background">
+        <img class="background-img-large" src="/images/default-avatar.jpg" alt="image">
+        <button id="set-background-img-btn" class="set-img-btn background">📷</button>
 
         <div class="profile-avatar">
           <img class="author-image-large" src="/images/default-avatar.jpg" alt="image">
-          <button class="set-img-btn">📷</button>
+          <button id="set-avatar-img-btn" class="set-img-btn">📷</button>
         </div>
 
       </div>
@@ -100,7 +102,7 @@
       <h2>
         Choose image
       </h2>
-      <img id="img-to-set" class="author-image-large" src="/images/default-avatar.jpg">
+      <img id="img-to-set"  src="/images/default-avatar.jpg">
       <form id="upload-form">
         <input type="file" name="image" id="file-input" accept="image/*">
         <button id="upload-btn" type="submit">Upload</button>

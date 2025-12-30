@@ -29,6 +29,17 @@ async function loadProfile(username) {
     document.querySelector('.author-name').innerText = userProfile.username;
 
     document.querySelector('.author-image-large').src = userProfile.authorImage;
+
+    if (userProfile.backgroundImage) {
+      console.log(`backgroundImage: ${userProfile.backgroundImage}`);
+      const backgroundImg = document.querySelector('.background-img-large');
+      backgroundImg.style.display = 'block';
+      backgroundImg.src = userProfile.backgroundImage;
+    }
+    else{
+      console.log(`backgroundImage:e nul}`);
+    }
+
   } catch (err) {
     console.error(err);
   }
@@ -38,19 +49,38 @@ async function loadProfile(username) {
 loadProfile(getUsername());
 
 
-const setImgBtn = document.querySelector('.set-img-btn');
+const setImgBtns = document.querySelectorAll('.set-img-btn');
+
 
 if (getUserFromCookie() !== getUsername()) {
-  setImgBtn.style.display = 'none';
+  setImgBtns.forEach(btn => btn.style.display = 'none');
 }
 
 
-setImgBtn.addEventListener('click', () => {
+const BACKGROUND_MODE = 1;
+const AVATAR_MODE = 2;
+
+let mode = AVATAR_MODE;
+
+const setAvatarImgBtn = document.getElementById('set-avatar-img-btn');
+setAvatarImgBtn.addEventListener('click', () => {
+  console.log('click avatar');
   document.body.style.overflow = 'hidden';
   document.querySelector('.set-img-container').style.display = 'grid';
-
+  img.classList.remove('background-img');
+  img.classList.add('author-image-large');
+  mode = AVATAR_MODE;
 });
-
+const img = document.getElementById('img-to-set');
+const setBackgroundImgBtn = document.getElementById('set-background-img-btn');
+setBackgroundImgBtn.addEventListener('click', () => {
+  console.log('click background');
+  document.body.style.overflow = 'hidden';
+  document.querySelector('.set-img-container').style.display = 'grid';
+  img.classList.add('background-img');
+  img.classList.remove('author-image-large');
+  mode = BACKGROUND_MODE;
+});
 
 const cancelBtn = document.getElementById('cancel-btn');
 cancelBtn.addEventListener('click', () => {
@@ -65,7 +95,7 @@ let previewURl = null;
 
 const form = document.getElementById('upload-form');
 
-const img = document.getElementById('img-to-set');
+
 
 const fileInput = document.getElementById('file-input');
 
@@ -78,6 +108,7 @@ fileInput.addEventListener('change', () => {
   }
 
   previewURl = URL.createObjectURL(file);
+
   img.style.display = 'block';
   img.src = previewURl;
 
@@ -98,7 +129,8 @@ form.addEventListener('submit', async (e) => {
   formData.append('image', file);
 
   try {
-    const res = await fetch('/api/profile/upload/avatar', {
+    const url = mode === AVATAR_MODE ? '/api/profile/upload/avatar' : '/api/profile/upload/background';
+    const res = await fetch(url, {
       method: 'POST',
       body: formData,
 
