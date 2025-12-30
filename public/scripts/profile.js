@@ -81,23 +81,30 @@ setBackgroundImgBtn.addEventListener('click', () => {
   img.classList.remove('author-image-large');
   mode = BACKGROUND_MODE;
 });
+const fileInput = document.getElementById('file-input');
+let previewURl = null;
 
 const cancelBtn = document.getElementById('cancel-btn');
 cancelBtn.addEventListener('click', () => {
   document.body.style.overflow = 'auto';
   document.querySelector('.set-img-container').style.display = 'none';
+  if (fileInput.files.length > 0) {
+    fileInput.value = null;
+  }
+  img.style.display = 'none';
+
 });
 
 
 
 
-let previewURl = null;
+
 
 const form = document.getElementById('upload-form');
 
 
 
-const fileInput = document.getElementById('file-input');
+
 
 fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
