@@ -5,6 +5,43 @@ const commentBtn = document.getElementsByClassName("comment-btn");
 const accountBtn = document.getElementById("account-btn");
 let username = isProfileMode();
 
+
+function formatDate(ts){
+  const now = Date.now();
+  const diff = now - ts;
+  
+  const sec = Math.floor(diff / 1000);
+  if (sec < 15) return 'just now';
+  if (sec < 60) return `${sec} seconds ago`;
+
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} minutes ago`;
+
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} hours ago`;
+
+  const day = Math.floor(hr / 24);
+  if (day === 1) return 'yesterday';
+  if (day < 7) return `${day} days ago`;
+
+  const date = new Date(ts);
+
+
+  const sameYear = date.getFullYear() === now.getFullYear();
+
+  const options = {
+    day: "numeric",
+    month: "long",
+  }
+
+  if (!sameYear) {
+    options.year = "numeric";
+  }
+
+  return new Intl.DateTimeFormat("en-GB", options).format(date);
+
+}
+
 function isProfileMode() {
   const pathParts = window.location.pathname.split('/');
   console.log(pathParts);
@@ -549,10 +586,10 @@ function createPost(post) {
   const postDate = document.createElement('div');
   postDate.classList.add('post-date');
   if (post.edited) {
-    postDate.textContent = post.last_modified_at + ' (edited)';
+    postDate.textContent = formatDate(post.lastModifiedAt) + ' (edited)';
   }
   else {
-    postDate.textContent = post.createdAt;
+    postDate.textContent = formatDate(post.createdAt);
   }
 
   postInformation.appendChild(postDate);
@@ -773,7 +810,7 @@ function createComment(comment) {
 
   const commentDate = document.createElement('div');
   commentDate.classList.add('comment-date');
-  commentDate.textContent = comment.createdAt;
+  commentDate.textContent = formatDate(comment.createdAt); // comment.createdAt;
   commentBottomWrapper.appendChild(commentDate);
 
   const replyBtn = document.createElement('button');
@@ -890,7 +927,7 @@ function createReply(reply) {
 
   const commentDate = document.createElement('div');
   commentDate.classList.add('comment-date');
-  commentDate.textContent = reply.createdAt;
+  commentDate.textContent = formatDate(reply.createdAt); //  reply.createdAt;
   commentBottomWrapper.appendChild(commentDate);
 
   const replyBtn = document.createElement('button');
@@ -1331,7 +1368,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
     const postDate = postEl.querySelector('.post-date');
 
-    postDate.textContent = postData.last_modified_at + ' (edited)';
+    postDate.textContent = postData.lastModifiedAt + ' (edited)';
 
     const editingContainer = postEl.querySelector('.editing-container');
     editingContainer.style.display = 'none';

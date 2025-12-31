@@ -854,6 +854,10 @@ h1 {
     flex-direction: row;
   }
 
+  .post-content{
+    flex-grow: 1;
+  }
+
 }
 
 

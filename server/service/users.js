@@ -384,7 +384,7 @@ function getCommentData(comment) {
     id: comment.id,
     authorName: comment.username,
     commentText: comment.content,
-    createdAt: comment.created_at,
+    createdAt: comment.createdAt ?? comment.created_at,
     commentHearts: comment.heart_count,
     commentReplies: comment.reply_count,
     parentId: comment.parent_id,
@@ -406,7 +406,7 @@ function getPostData(post) {
   return {
     id: post.id,
     authorName: post.username,
-    createdAt: post.created_at,
+    createdAt: post.createdAt ?? post.created_at,
     postText: post.text,
     postHearts: post.heart_count,
     postLikes: post.like_count,
@@ -418,7 +418,7 @@ function getPostData(post) {
     authorImage: post.avatar_img_url ?? "/avatars/default-avatar.jpg",
     isCreatedByUser: post.isCreatedByUser ?? false,           //czy jest to post autorski,
     liked: post.reaction ?? 0,
-    last_modified_at: post.last_modified_at,
+    lastModifiedAt: post.lastModifiedAt ?? post.last_modified_at,
     edited: post.edited
   }
 }
