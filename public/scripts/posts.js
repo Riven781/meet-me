@@ -1368,7 +1368,7 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
 
     const postDate = postEl.querySelector('.post-date');
 
-    postDate.textContent = postData.lastModifiedAt + ' (edited)';
+    postDate.textContent =  formatDate(postData.lastModifiedAt) + ' (edited)';
 
     const editingContainer = postEl.querySelector('.editing-container');
     editingContainer.style.display = 'none';
