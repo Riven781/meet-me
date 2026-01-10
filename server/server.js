@@ -123,8 +123,6 @@ app.post('/api/login', async (req, res) => {
         req.session.userId = result.userId;
         req.session.username = result.username;
 
-
-
         res.cookie('username', result.username, {
           maxAge: 24 * 60 * 60 * 1000,  //podaje sie w milisekundach (dla przeglądarki)
           httpOnly: false,
