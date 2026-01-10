@@ -231,7 +231,8 @@ async function loadPosts(lastId = null) {
       end = true;
     }
 
-    const newPosts = data.posts || [];
+    const newPosts = data.posts.filter(post => !appModel.postsById[post.id]) || [];
+    //dodano filtracje
 
     //const newPosts = await res.json();
     appModel.posts.push(...newPosts);
@@ -335,7 +336,7 @@ async function loadComments(postId, postEl, firstLoad) {  //jeszcze end ktore us
   //console.log(` loaded nextCommentCursor: ${appModel.commentsByPostId[postId].nextCommentCursor}`);
   appModel.commentsByPostId[postId] = commentsByPostId;
 
-  const newComments = data.comments || [];
+  const newComments = data.comments.filter(comment => !appModel.commentsById[comment.id]) || [];  //dodano filtracje
 
   newComments.forEach(comment => {
     appModel.commentsById[comment.id] = comment;
@@ -384,7 +385,7 @@ async function loadReplies(postId, commentId, commentEl) {
     repliesByCommentId.end = true;
   }
 
-  const replies = data.comments || [];
+  const replies = data.comments.filter(reply => !appModel.commentsById[reply.id]) || [];  //dodano filtracje
 
   replies.forEach(reply => {
     appModel.commentsById[reply.id] = reply;
