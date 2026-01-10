@@ -257,6 +257,7 @@ main {
 .post-content {
   padding: 10px 0;
   font-size: clamp(10px, 8.4vw, 18px);
+  word-break: break-all;
 }
 
 .reactions {
@@ -521,6 +522,7 @@ h1 {
 
   flex-wrap: wrap;
   font-size: clamp(10px, 4.0vw, 16px);
+  word-break: break-all ;
 }
 
 
@@ -920,7 +922,7 @@ h1 {
 
   .comment {
     gap: 2px;
-    padding: 2px;
+    padding: 0px;
 
   }
   .post-header {
