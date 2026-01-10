@@ -8,6 +8,7 @@ let username = isProfileMode();
 
 function formatDate(ts){
   const now = Date.now();
+  const nowDate = new Date();
   const diff = now - ts;
   
   const sec = Math.floor(diff / 1000);
@@ -27,7 +28,7 @@ function formatDate(ts){
   const date = new Date(ts);
 
 
-  const sameYear = date.getFullYear() === now.getFullYear();
+  const sameYear = date.getFullYear() === nowDate.getFullYear();
 
   const options = {
     day: "numeric",
@@ -724,7 +725,7 @@ function createPost(post) {
   const rightButtons = document.createElement('div');
   rightButtons.classList.add('right-buttons');
   postInteractions.appendChild(rightButtons);
-
+  /*
   const saveBtn = document.createElement('button');
   saveBtn.classList.add('interactions-btn');
   saveBtn.classList.add('save-btn');
@@ -732,7 +733,7 @@ function createPost(post) {
     saveBtn.classList.add('saved');
   }
   rightButtons.appendChild(saveBtn);
-  saveBtn.textContent = '📌';
+  saveBtn.textContent = '📌';*/
 
   const interactionCommentsWrapper = document.createElement('div');
   interactionCommentsWrapper.classList.add('interaction-wrapper');

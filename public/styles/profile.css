@@ -251,6 +251,10 @@ main {
 
 }
 
+.profile-header {
+  min-height: 100px;
+}
+
 @media screen and (max-width: 600px) {
   .author-image-large {
     width: clamp(90px, 15.0vw, 150px);
@@ -273,6 +277,12 @@ main {
     align-items: center;
     justify-content: center;
   }
+
+  .profile-avatar {
+    left: 50%;
+
+  }
+
 
 
 }

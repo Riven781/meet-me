@@ -54,6 +54,8 @@ const setImgBtns = document.querySelectorAll('.set-img-btn');
 
 if (getUserFromCookie() !== getUsername()) {
   setImgBtns.forEach(btn => btn.style.display = 'none');
+  const postForm = document.querySelector('.post-form');
+  postForm.style.display = 'none';
 }
 
 
