@@ -1,5 +1,6 @@
-import e from 'express';
-import { createUser, getCommentById, getComments, getPostById, getPosts, getReplies, getUserByEmailAndPassword, getUserByUsernameAndPassword, insertComment, insertPost, setReaction, likeComment, unlikeComment, findUserByUsername, getPostsByUsername, updatePost, deletePostById, saveAvatarImgUrl, saveBackgroundImgUrl } from '../repository/users.js'
+import { createUser, getUserByEmailAndPassword, getUserByUsernameAndPassword, findUserByUsername, saveAvatarImgUrl, saveBackgroundImgUrl } from '../repository/users.repository.js'
+import { getCommentById, getComments, insertComment, likeComment, unlikeComment, getReplies } from '../repository/comments.repository.js';
+import { getPostById, getPosts, insertPost, setReaction, getPostsByUsername, updatePost, deletePostById } from '../repository/posts.repository.js';
 
 
 
@@ -42,7 +43,7 @@ export async function loginUser(userData) {
     let user;
     if (usernameOrEmail.includes('@')) {
       user = await getUserByEmailAndPassword(usernameOrEmail, password);
-      
+
     } else {
       user = await getUserByUsernameAndPassword(usernameOrEmail, password);
     }
@@ -75,7 +76,7 @@ export async function loginUser(userData) {
 }
 
 export async function getPostByPostId(postId, userId) {
-  try{
+  try {
     const postData = await getPostById(postId, userId);
     console.log(` postData: ${JSON.stringify(postData)}`);
     if (postData) {
@@ -104,7 +105,7 @@ export async function getPostByPostId(postId, userId) {
       }
     }
   }
-  
+
 }
 
 export async function createPost(userId, text) {
@@ -224,12 +225,12 @@ export async function getPostsByUser(userId, username, limit = 20, lastPostCurso
       }
     }
   }
-  
-  
+
+
 }
 
 
-export async function getCommentsForPost( userId, postId, limit = 20, lastCommentCursor = null) {
+export async function getCommentsForPost(userId, postId, limit = 20, lastCommentCursor = null) {
   try {
     const data = await getComments(postId, userId, limit, lastCommentCursor);
     const rows = data.comments;
@@ -288,11 +289,11 @@ export async function getRepliesForComment(userId, parentId, limit = 20, lastCom
     return {
       ok: false,
       code: "COMMENTS_NOT_FOUND_ERROR",
-errors: {
-      text: error?.message ?? "Comments not found",
-      sqlMessage: error?.sqlMessage,
-      code: error?.code,
-    }
+      errors: {
+        text: error?.message ?? "Comments not found",
+        sqlMessage: error?.sqlMessage,
+        code: error?.code,
+      }
     }
   }
 }
@@ -342,7 +343,7 @@ export async function publishComment(userId, postId, content, parentId = null, r
 }
 
 export async function deletePost(commentId) {
-  try{
+  try {
     const result = await deletePostById(commentId);
     if (!result) {
       return {
@@ -393,8 +394,8 @@ function getCommentData(comment) {
   }
 }
 
-function getProfileData(user){
-  return{
+function getProfileData(user) {
+  return {
     username: user.username,
     authorImage: user.avatar_img_url ?? "/avatars/default-avatar.jpg",
     backgroundImage: user.background_img_url ?? null,
@@ -506,7 +507,7 @@ export async function removeCommentLike(userId, commentId) {
 }
 
 export async function getUserByUsername(username) {
-  try{
+  try {
     const user = await findUserByUsername(username);
     //console.log(user);
     //console.log(user.username);
@@ -523,7 +524,7 @@ export async function getUserByUsername(username) {
     return {
       ok: true,
       code: "USER_FOUND",
-      user : getProfileData(user)
+      user: getProfileData(user)
     }
   } catch (error) {
     console.error(error);
@@ -557,8 +558,8 @@ export async function editPost(postId, text) {
 }
 
 
-export async function saveImageUrl(userId, imageUrl, imageType){
-  try{
+export async function saveImageUrl(userId, imageUrl, imageType) {
+  try {
     if (imageType === "avatar") {
       const result = await saveAvatarImgUrl(userId, imageUrl);
       return {

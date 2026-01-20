@@ -188,12 +188,11 @@ async function loginUser(usernameOrEmail, password){
     body: JSON.stringify({usernameOrEmail, password})
   });
 
-  const data = await res.json();
 
   return {
     ok : res.ok,
     status: res.status,
-    data
+
   }
 }
 

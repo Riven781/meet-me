@@ -336,7 +336,11 @@ async function loadComments(postId, postEl, firstLoad) {  //jeszcze end ktore us
   //console.log(` loaded nextCommentCursor: ${appModel.commentsByPostId[postId].nextCommentCursor}`);
   appModel.commentsByPostId[postId] = commentsByPostId;
 
+  console.log(`comments ${data.comments}`)
+
   const newComments = data.comments.filter(comment => !appModel.commentsById[comment.id]) || [];  //dodano filtracje
+
+
 
   newComments.forEach(comment => {
     appModel.commentsById[comment.id] = comment;
@@ -973,6 +977,10 @@ document.querySelector('.posts').addEventListener('click', async (e) => {
     const currentPostId = postEl.dataset.postId;
 
     appModel.repliesByCommentId = {};
+
+
+    appModel.commentsById = {};  //swiezo dodane
+
 
     for (const postId in appModel.commentsByPostId) {
       console.log("blee");

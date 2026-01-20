@@ -1,11 +1,15 @@
+import "dotenv/config";
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
-import mysql from 'mysql2';
 import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost, deletePost, saveImageUrl } from './service/users.js';
 import session from 'express-session';
 import multer from 'multer';
-
+import { loginController, logoutController, registerController } from "./controller/auth.controller.js";
+import { createPostController, deletePostController, editPostController, getPostsController, setReactionController } from "./controller/posts.controller.js";
+import { addCommentLikeController, getCommentsController, publishCommentController, removeCommentLikeController } from "./controller/comments.controller.js";
+import { getProfileController, uploadAvatarController, uploadBackgroundController } from "./controller/users.controller.js";
+import { requireAuth, requireAuthPage } from "./middlewares/auth.middleware.js";
 
 const app = express();
 
@@ -59,24 +63,7 @@ app.use(session({
   }
 }));
 
-function requireAuth(req, res, next) {
-  if (!req.session.userId) {
-    return res.status(401).json({ code: "UNAUTHORIZED" });
-  }
-  else {
-    next();
-  }
-}
 
-
-function requireAuthPage(req, res, next) {
-  if (!req.session.userId) {
-    return res.redirect('/start');
-  }
-  else {
-    next();
-  }
-}
 const protectedRouter = express.Router();
 protectedRouter.use(requireAuthPage);
 
@@ -95,329 +82,40 @@ app.get('/start', (req, res) => {
 })
 
 
-app.post('/api/register', async (req, res) => {
-  try {
-    const result = await registerUser(req.body);
-    if (result.ok) {
-      res.status(200).json(result);
-    } else {
-      const status = result.code === "USER_ALREADY_EXISTS" ? 409 : 400;
+app.post('/api/register', registerController);
 
-      res.status(status).json(result);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
+app.post('/api/login', loginController);
 
-app.post('/api/login', async (req, res) => {
-  try {
-    const result = await loginUser(req.body);
-    if (result.ok) {
-      req.session.regenerate((err) => {  //usunie id starej sesji przy nowym zalogowaniu
-        if (err) {
-          console.error(err);
-          res.status(500).json({ code: "SESSION_ERROR" });
-        }
-        req.session.userId = result.userId;
-        req.session.username = result.username;
+app.post('/api/createPost', requireAuth, createPostController);
 
-        res.cookie('username', result.username, {
-          maxAge: 24 * 60 * 60 * 1000,  //podaje sie w milisekundach (dla przeglądarki)
-          httpOnly: false,
-          secure: false,
-          sameSite: 'lax'
-        });
+app.get("/api/getPosts", requireAuth, getPostsController);
 
-        res.status(200).json({
-          ok: true
-        });
-      });
+app.post('/api/reaction', requireAuth, setReactionController);
+
+app.get('/api/getComments', requireAuth, getCommentsController);
+
+app.post('/api/postComment', requireAuth, publishCommentController);
+
+app.put("/api/comments/:commentId/like", requireAuth, addCommentLikeController);
+
+app.delete("/api/comments/:commentId/like", requireAuth, removeCommentLikeController);
+
+app.get("/api/profile/:username", requireAuth, getProfileController);
+
+app.patch("/api/posts/:postId", requireAuth, editPostController);
 
 
-    } else {
-      res.status(401).json(result);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-})
+app.delete("/api/posts/:postId", requireAuth, deletePostController);
 
-app.post('/api/createPost', requireAuth, async (req, res) => {
-  try {
-    const result = await createPost(req.session.userId, req.body.text);
-    console.log(JSON.stringify(result));
-    if (result.ok) {
-      res.status(200).json(result);
-    } else {
-      res.status(400).json(result);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
+app.post("/api/logout", logoutController);
 
-app.get("/api/getPosts", requireAuth, async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const limit = Number(req.query.limit) || 20;
+app.post('/api/profile/upload/avatar', requireAuth, upload.single('image'), uploadAvatarController);
 
-    let lastPostCursor = null;
-    if (req.query.lastPostCursor) {
-      lastPostCursor = decodeCursor(req.query.lastPostCursor);
-    }
-    console.log(` username: ${req.query.username}`);
-    let posts;
-    if (req.query.username) {
-
-      posts = await getPostsByUser(userId, req.query.username, limit, lastPostCursor);
-    }
-    else {
-      posts = await getFeed(userId, limit, lastPostCursor);
-    }
-
-    //console.log(` posts: ${posts.posts }`);
-    //console.log(` posts.length: ${posts.posts.length }`);
+app.post("/api/profile/upload/background", requireAuth, upload.single('image'), uploadBackgroundController);
 
 
-    if (!posts.ok) {
-      return res.status(404).json({ code: "POSTS_NOT_FOUND" });
-    }
-
-    res.status(200).json(posts);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-app.post('/api/reaction', requireAuth, async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { postId, reactionType } = req.body;
-    const result = await setReactionToPost(userId, postId, reactionType);
-    res.status(200).json(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-
-app.post('/api/postComment', requireAuth, async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const { postId, content, parentId, replyToCommentId } = req.body;
-    console.log(` parentId: ${parentId}`);
-    const result = await publishComment(userId, postId, content, parentId, replyToCommentId);
-    if (result.ok) {
-      res.status(200).json(result);
-    } else {
-      res.status(400).json(result);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-app.get('/api/getComments', requireAuth, async (req, res) => {
-  try {
-    const postId = Number(req.query.postId);
-    const limit = Number(req.query.limit) || 20;
-    const userId = req.session.userId;
-    let lastCommentCursor = null;
-    if (req.query.lastCommentCursor) {
-      lastCommentCursor = decodeCursor(req.query.lastCommentCursor);
-    }
-    if (req.query.parentId) {
-      const parentId = Number(req.query.parentId);
-      console.log(` parentId: ${parentId}`);
-      const comments = await getRepliesForComment(parentId,userId, limit, lastCommentCursor);
-      console.log(` comments: ${JSON.stringify(comments)}`);
-      res.status(200).json(comments);
-      return;
-    } else {
-      const comments = await getCommentsForPost( userId, postId, limit, lastCommentCursor);
-      res.status(200).json(comments);
-    }
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-
-app.put("/api/comments/:commentId/like", requireAuth, async (req, res) => {
-  try {
-    console.log(`put`);
-    const commentId = Number(req.params.commentId);
-    const userId = req.session.userId;
-
-    const result = await addCommentLike(userId, commentId);
-
-    if (!result.ok) {
-      return res.status(400).json(result);
-    }
-    else {
-      res.sendStatus(204);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-
-app.delete("/api/comments/:commentId/like", requireAuth, async (req, res) => {
-  try {
-    console.log(`delete`);
-    const commentId = Number(req.params.commentId);
-    const userId = req.session.userId;
-    const result = await removeCommentLike(userId, commentId);
-    if (!result.ok) {
-      return res.status(400).json(result);
-    }
-    else {
-      res.sendStatus(204);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
 })
 
-app.get("/api/profile/:username", requireAuth, async (req, res) => {
-  try {
-    const username = req.params.username;
-    const user = await getUserByUsername(username);
-    if (!user.ok) {
-      return res.status(404).json({ code: "USER_NOT_FOUND" });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-
-app.patch("/api/posts/:postId", requireAuth, async (req, res) => {
-  try {
-    const postId = Number(req.params.postId);
-    const { content } = req.body;
-    const userId = req.session.userId;
-    const username = req.session.username;
-
-    try {
-      const data = await getPostByPostId(postId, userId);
-      if (data.postData.authorName !== username) {
-        return res.status(401).json({ code: "UNAUTHORIZED" });
-      }
-      if (!data.ok) {
-        return res.status(404).json({ code: "POST_NOT_FOUND" });
-      }
-    }
-    catch (error) {
-      console.error(error);
-      return res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-    }
-
-
-    const result = await editPost(postId, content);
-    if (!result.ok) {
-      return res.status(400).json(result);
-    }
-
-    const afterEditPost = await getPostByPostId(postId, userId);
-
-    if (!afterEditPost.ok) {
-      return res.status(404).json({ code: "POST_NOT_FOUND" });
-    }
-    res.status(200).json(afterEditPost);
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-app.delete("/api/posts/:postId", requireAuth, async (req, res) => {
-  try {
-    console.log(`delete`);
-    const postId = Number(req.params.postId);
-    console.log(`postId: ${postId}`);
-    const username = req.session.username;
-    const userId = req.session.userId;
-    const data = await getPostByPostId(postId, userId);
-    if (data.postData.authorName !== username) {
-      console.log(`post.authorName: ${data.postData.authorName}, username: ${username}`);
-      return res.status(404).json({ code: "UNAUTHORIZED" });
-    }
-    const result = await deletePost(postId);
-    console.log(`result: ${JSON.stringify(result)}`);
-    if (!result.ok) {
-      return res.status(400).json({ code: "POST_DELETE_FAILED" });
-    }
-    res.sendStatus(204);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-app.post("/api/logout", (req, res) => {
-   req.session.destroy(() => 
-    { 
-    res.clearCookie("username", { path: "/" }); 
-    res.clearCookie("meet-me-session", { path: "/" });
-    res.sendStatus(200); 
-  }); 
-});
-
-app.post("/api/profile/upload/avatar", requireAuth, upload.single('image'), async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const result = await saveImageUrl(userId, '/avatars/' + req.file.filename, "avatar");
-    if (!result.ok) {
-      return res.status(400).json(result);
-    }
-    res.sendStatus(204);
-
-    console.log(`req.file: ${JSON.stringify(req.file)}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-
-app.post("/api/profile/upload/background", requireAuth, upload.single('image'), async (req, res) => {
-  try {
-    const userId = req.session.userId;
-    const result = await saveImageUrl(userId, '/backgrounds/' + req.file.filename, "background");
-    if (!result.ok) {
-      return res.status(400).json(result);
-    }
-    res.sendStatus(204);
-
-    console.log(`req.file: ${JSON.stringify(req.file)}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "INTERNAL_SERVER_ERROR" });
-  }
-});
-
-
-
-function decodeCursor(cursor) {
-  const cursorStr = Buffer.from(cursor, 'base64').toString('utf8');
-  return JSON.parse(cursorStr);
-}
