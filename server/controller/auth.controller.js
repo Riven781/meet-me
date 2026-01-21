@@ -5,7 +5,7 @@ import { loginUser, registerUser } from "../service/auth.service.js";
 export async function registerController(req, res, next) {
   try {
     await registerUser(req.body);
-    res.status(201);
+    res.sendStatus(201);
   } catch (error) {
     next(error);
   }

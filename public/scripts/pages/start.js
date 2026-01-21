@@ -1,8 +1,7 @@
+import { onLoginSubmit, onRegisterSubmit } from "../controller/auth.controller.js";
 
-const LOGIN_STATUS = 0;
-const REGISTER_STATUS = 1;
 
-let wStatus = LOGIN_STATUS;
+
 
 const registerOptionBtn = document.getElementById('register-option-btn');
 const loginOptionBtn = document.getElementById('login-option-btn');
@@ -13,7 +12,6 @@ const loginElements = document.querySelectorAll('.login');
 const registerElements = document.querySelectorAll('.register');
 
 registerOptionBtn.addEventListener('click', () => {
-  wStatus = REGISTER_STATUS;
 
   loginElements.forEach(el => el.classList.add('hide'));
   registerElements.forEach(el => el.classList.remove('hide'));
@@ -21,7 +19,6 @@ registerOptionBtn.addEventListener('click', () => {
 });
 
 loginOptionBtn.addEventListener('click', () => {
-  wStatus = LOGIN_STATUS;
 
   loginElements.forEach(el => el.classList.remove('hide'));
   registerElements.forEach(el => el.classList.add('hide'));
@@ -157,8 +154,6 @@ usernameInput.addEventListener('blur', () => {
 });
 
 
-const specialEffect = document.querySelector('.special-effect');
-
 
 async function registerUser(userData){
   const res = await fetch('api/register', {
@@ -169,12 +164,9 @@ async function registerUser(userData){
     body: JSON.stringify(userData)
   });
 
-  const data = await res.json();
-
   return {
     ok : res.ok,
     status: res.status,
-    data
   }
 }
 
@@ -196,66 +188,26 @@ async function loginUser(usernameOrEmail, password){
   }
 }
 
-
-async function onLoginSubmit(e){
-  e.preventDefault();
-  const usernameOrEmail = loginInput.value;
-  const password = passwordInput.value;
-  const result = await loginUser(usernameOrEmail, password);
-  
-  if (result.ok) {
-    loginInput.value = '';
-    passwordInput.value = '';
-    emailInput.value = '';
-    firstNameInput.value = '';
-    lastNameInput.value = '';
-    usernameInput.value = '';
-
-    window.location.href = '/meet-me/posts';
-  }
-  else{
-    console.log("error");
-    console.log(result);
-  }
+const inputs = {
+  loginInput,
+  passwordInput,
+  emailInput,
+  firstNameInput,
+  lastNameInput,
+  usernameInput
 }
 
 
-async function onRegisterSubmit(e){
-  e.preventDefault();
-  const username = usernameInput.value;
-  const email = emailInput.value;
-  const firstName = firstNameInput.value;
-  const lastName = lastNameInput.value;
-  const password = passwordInput.value;
-  const result = await registerUser({username, email, password, first_name: firstName, last_name: lastName});
-  
-  if (result.ok) {
-    wStatus = LOGIN_STATUS;
 
-    loginElements.forEach(el => el.classList.remove('hide'));
-    registerElements.forEach(el => el.classList.add('hide'));
-    loginInput.value = username;
-    emailInput.value = '';
-    firstNameInput.value = '';
-    lastNameInput.value = '';
-    usernameInput.value = '';
-    passwordInput.value = '';
-
-
-    
-    console.log("okkkk");
-    console.log(result);
-  }
-  else{
-    console.log("error");
-    console.log(result);
-  }
-}
-
-//czytaj wartosci przy kliknieciu przycisku
 
 const registerButton = document.getElementById('register-btn');
-registerButton.addEventListener('click', onRegisterSubmit);
+registerButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  onRegisterSubmit( inputs, loginElements, registerElements);
+});
 
 const loginButton = document.getElementById('login-btn');
-loginButton.addEventListener('click', onLoginSubmit);
+loginButton.addEventListener('click', (e) => {
+  e.preventDefault();
+  onLoginSubmit( inputs);
+});

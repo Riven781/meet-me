@@ -66,8 +66,11 @@ export async function setReactionController(req, res, next) {
   try {
     const userId = req.session.userId;
     const { postId, reactionType } = req.body;
-
+    //await new Promise(r => setTimeout(r, Math.random() * 9200));
     const data = await setReactionToPost(userId, postId, reactionType);
+
+    
+
 
     res.json(data);
   } catch (err) {

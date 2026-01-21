@@ -10,6 +10,7 @@ import { createPostController, deletePostController, editPostController, getPost
 import { addCommentLikeController, getCommentsController, publishCommentController, removeCommentLikeController } from "./controller/comments.controller.js";
 import { getProfileController, uploadAvatarController, uploadBackgroundController } from "./controller/users.controller.js";
 import { requireAuth, requireAuthPage } from "./middlewares/auth.middleware.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -113,7 +114,7 @@ app.post('/api/profile/upload/avatar', requireAuth, upload.single('image'), uplo
 
 app.post("/api/profile/upload/background", requireAuth, upload.single('image'), uploadBackgroundController);
 
-
+app.use(errorHandler);
 
 app.listen(3000, () => {
   console.log('Example app listening on port 3000!')
