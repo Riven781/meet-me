@@ -51,3 +51,8 @@ export function setLoginErrorMessage(){
   const generalErrorMsg = document.getElementById('general-error-msg');
   generalErrorMsg.textContent = "Invalid username/email or password";
 }
+
+export function setServerErrorForForms(){
+  const generalErrorMsg = document.getElementById('general-error-msg');
+  generalErrorMsg.textContent = "Problem with server. Try again later... 😅";
+}

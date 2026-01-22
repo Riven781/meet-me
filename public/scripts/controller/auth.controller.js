@@ -1,5 +1,5 @@
 import { loginUser, logout, registerUser } from "../api/auth.api.js";
-import { setLoginErrorMessage, setRegisterErrorMessage } from "../utils/formErrors.js";
+import { setLoginErrorMessage, setRegisterErrorMessage, setServerErrorForForms } from "../utils/formErrors.js";
 
 
 export async function onLogout() {
@@ -35,6 +35,10 @@ export async function onLoginSubmit(inputs) {
     //console.error(err);
     if (err?.code === 'INVALID_CREDENTIALS') {
       setLoginErrorMessage();
+    }
+
+    if (err?.code === 'INTERNAL_SERVER_ERROR'){
+      setServerErrorForForms();
     }
   }
 }
@@ -78,7 +82,9 @@ export async function onRegisterSubmit(inputs, loginElements, registerElements) 
     if (err?.code === 'VALIDATION_ERROR' || err?.code === 'USER_ALREADY_EXISTS') {
       setRegisterErrorMessage(err?.details?.errors);
     }
+    if (err?.code === 'INTERNAL_SERVER_ERROR'){
+      setServerErrorForForms();
+    }
   }
 }
-
 
