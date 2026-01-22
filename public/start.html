@@ -28,26 +28,33 @@
         <div class="field register hide">
           <label id="email-label" for="username-input">Email</label>
           <input type="text" placeholder="Email" id="email-input"  required>
+          <span id="email-error-msg" class="error"></span>
         </div>
 
         <div class="field register hide">
           <label id="first-name-label" for="first-name-input">First name</label>
           <input type="text" placeholder="First name" id="first-name-input"  required>
+          <span id="first-name-error-msg" class="error"></span>
         </div>
 
         <div class="field register hide">
           <label id="last-name-label" for="last-name-input">Last name</label>
           <input type="text" placeholder="Last name" id="last-name-input"  required>
+          <span id="last-name-error-msg" class="error"></span>
         </div>
 
         <div class="field register hide">
           <label id="username-label" for="username-input">Username</label>
           <input type="text" placeholder="Username" id="username-input"  required>
+          <span id="username-error-msg" class="error"></span>
+        
         </div>
 
         <div class="field">
           <label id="password-label" for="password-input">Password</label>
           <input type="password" placeholder="Password" id="password-input" required>
+          <span id="password-error-msg" class="error"></span>
+          
         </div>
   
         
@@ -56,6 +63,8 @@
       <button type="submit" class="submit-btn login" id="login-btn">Login</button>
 
       <button type="submit" class="submit-btn register hide" id="register-btn">Register</button>
+
+      <span id="general-error-msg" class="error"></span>
     </form>
     <section id="register-option" class="option login">
       <p>

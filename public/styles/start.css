@@ -192,3 +192,20 @@ input:focus {
   }
   
 }
+
+.error-field{
+  outline: 2px solid red;
+  
+}
+
+.error{
+  color: red;
+  font-size: 12px;
+  padding: 0 5px;
+}
+
+#general-error-msg{
+  text-align: center;
+  color: rgb(110, 0, 0);
+  font-weight: bold;
+}

@@ -1,4 +1,5 @@
 import { loginUser, logout, registerUser } from "../api/auth.api.js";
+import { setLoginErrorMessage, setRegisterErrorMessage } from "../utils/formErrors.js";
 
 
 export async function onLogout() {
@@ -17,7 +18,7 @@ function clearInputs(...inputs) {
   }
 }
 
-export async function onLoginSubmit( inputs) {
+export async function onLoginSubmit(inputs) {
 
   const { loginInput, passwordInput, emailInput, firstNameInput, lastNameInput, usernameInput } = inputs;
 
@@ -31,8 +32,10 @@ export async function onLoginSubmit( inputs) {
 
     window.location.href = "/meet-me/posts";
   } catch (err) {
-    console.error(err);
-    //todo: pokaz error
+    //console.error(err);
+    if (err?.code === 'INVALID_CREDENTIALS') {
+      setLoginErrorMessage();
+    }
   }
 }
 
@@ -72,7 +75,10 @@ export async function onRegisterSubmit(inputs, loginElements, registerElements) 
     clearInputs(emailInput, firstNameInput, lastNameInput, usernameInput, passwordInput);
 
   } catch (err) {
-    console.error(err);
-    //todo napisz co poszło nie tak
+    if (err?.code === 'VALIDATION_ERROR' || err?.code === 'USER_ALREADY_EXISTS') {
+      setRegisterErrorMessage(err?.details?.errors);
+    }
   }
 }
+
+

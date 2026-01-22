@@ -25,8 +25,13 @@ export async function registerUser(userData) {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`POST ${url} failed: ${res.status} ${res.statusText} ${text}`);
+    const data = await res.json().catch(() => null);
+
+    const err = new Error(`POST ${url} failed: ${res.status} ${res.statusText}`);
+    err.details = data?.details;
+    err.code = data?.code;
+    err.status = res.status;
+    throw err
   }
 }
 
@@ -41,7 +46,11 @@ export async function loginUser(usernameOrEmail, password) {
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`POST ${url} failed: ${res.status} ${res.statusText} ${text}`);
+    const data = await res.json().catch(() => null);
+    const err = new Error(`POST ${url} failed: ${res.status} ${res.statusText}`);
+    err.code = data?.code;
+    err.status = res.status;
+    throw err;
+
   }
 }

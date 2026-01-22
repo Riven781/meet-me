@@ -12,7 +12,7 @@ export function errorHandler(err, req, res, next) {
       response.details = err.details;
     }
 
-    res.status(err.statusCode).json(response);
+    return res.status(err.statusCode).json(response);
 
   }
 

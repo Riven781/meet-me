@@ -6,7 +6,7 @@ import { onLoginSubmit, onRegisterSubmit } from "../controller/auth.controller.j
 const registerOptionBtn = document.getElementById('register-option-btn');
 const loginOptionBtn = document.getElementById('login-option-btn');
 
-
+const generalErrorMsg = document.getElementById('general-error-msg');
 
 const loginElements = document.querySelectorAll('.login');
 const registerElements = document.querySelectorAll('.register');
@@ -15,6 +15,7 @@ registerOptionBtn.addEventListener('click', () => {
 
   loginElements.forEach(el => el.classList.add('hide'));
   registerElements.forEach(el => el.classList.remove('hide'));
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
 
 });
 
@@ -22,6 +23,7 @@ loginOptionBtn.addEventListener('click', () => {
 
   loginElements.forEach(el => el.classList.remove('hide'));
   registerElements.forEach(el => el.classList.add('hide'));
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
 });
 
 
@@ -155,38 +157,8 @@ usernameInput.addEventListener('blur', () => {
 
 
 
-async function registerUser(userData){
-  const res = await fetch('api/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(userData)
-  });
-
-  return {
-    ok : res.ok,
-    status: res.status,
-  }
-}
 
 
-async function loginUser(usernameOrEmail, password){
-  const res = await fetch('api/login', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({usernameOrEmail, password})
-  });
-
-
-  return {
-    ok : res.ok,
-    status: res.status,
-
-  }
-}
 
 const inputs = {
   loginInput,
@@ -211,3 +183,50 @@ loginButton.addEventListener('click', (e) => {
   e.preventDefault();
   onLoginSubmit( inputs);
 });
+
+
+
+
+usernameInput.addEventListener('input', () => {
+  const field = usernameInput.parentElement;
+  field?.classList.remove('error-field');
+  const errorMsg = document.getElementById('username-error-msg');
+  if (errorMsg) errorMsg.textContent = '';
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
+})
+
+passwordInput.addEventListener('input', () => {
+  const field = passwordInput.parentElement;
+  field?.classList.remove('error-field');
+  const errorMsg = document.getElementById('password-error-msg');
+  if (errorMsg) errorMsg.textContent = '';
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
+})
+
+emailInput.addEventListener('input', () => {
+  const field = emailInput.parentElement;
+  field?.classList.remove('error-field');
+  const errorMsg = document.getElementById('email-error-msg');
+  if (errorMsg) errorMsg.textContent = '';
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
+})
+
+firstNameInput.addEventListener('input', () => {
+  const field = firstNameInput.parentElement;
+  field?.classList.remove('error-field');
+  const errorMsg = document.getElementById('first-name-error-msg');
+  if (errorMsg) errorMsg.textContent = '';
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
+})
+
+lastNameInput.addEventListener('input', () => {
+  const field = lastNameInput.parentElement;
+  field?.classList.remove('error-field');
+  const errorMsg = document.getElementById('last-name-error-msg');
+  if (errorMsg) errorMsg.textContent = '';
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
+})
+
+loginInput.addEventListener('input', () => {
+  if (generalErrorMsg) generalErrorMsg.textContent = '';
+})

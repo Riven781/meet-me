@@ -31,7 +31,6 @@ export async function loginController(req, res, next) {
         sameSite: 'lax'
       });
 
-      console.log("ppp")
 
       res.sendStatus(200);
     });
