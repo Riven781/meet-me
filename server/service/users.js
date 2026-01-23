@@ -1,4 +1,4 @@
-import { createUser, getUserByEmailAndPassword, getUserByUsernameAndPassword, findUserByUsername, saveAvatarImgUrl, saveBackgroundImgUrl } from '../repository/users.repository.js'
+/*import { createUser, getUserByEmailAndPassword, getUserByUsernameAndPassword, findUserByUsername, saveAvatarImgUrl, saveBackgroundImgUrl } from '../repository/users.repository.js'
 import { getCommentById, getComments, insertComment, likeComment, unlikeComment, getReplies } from '../repository/comments.repository.js';
 import { getPostById, getPosts, insertPost, setReaction, getPostsByUsername, updatePost, deletePostById } from '../repository/posts.repository.js';
 
@@ -376,7 +376,7 @@ export async function setReactionToPost(userId, postId, reactionType) {
   return {
     ok: true,
     code: "REACTION_SET",
-    reaction: reaction  /*mozna sprawdzic czy dobrze dodajac 1 i sprawdzic czy w ui sie zgadza*/
+    reaction: reaction 
   }
 }
 
@@ -585,4 +585,4 @@ export async function saveImageUrl(userId, imageUrl, imageType) {
     }
   }
 
-}
+}*/

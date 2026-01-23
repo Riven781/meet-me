@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url';
-import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost, deletePost, saveImageUrl } from './service/users.js';
+//import { loginUser, registerUser, createPost, getFeed, setReactionToPost, publishComment, getCommentsForPost, getRepliesForComment, addCommentLike, removeCommentLike, getUserByUsername, getPostsByUser, getPostByPostId, editPost, deletePost, saveImageUrl } from './service/users.js';
 import session from 'express-session';
 import multer from 'multer';
 import { loginController, logoutController, registerController } from "./controller/auth.controller.js";

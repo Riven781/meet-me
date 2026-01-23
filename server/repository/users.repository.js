@@ -17,15 +17,15 @@ export async function createUser({ username, email, password, first_name, last_n
   return res.insertId;
 }
 
-export async function getUserByEmailAndPassword(email, password) {
-  const [rows] = await db.query('SELECT id, username FROM Users WHERE email = ? AND password = ?', [email, password]);
-  console.log(rows);
+export async function getUserByEmail(email) {
+  const [rows] = await db.query('SELECT id, username, password FROM Users WHERE email = ?', [email]);
+  //console.log(rows);
   return rows[0];
 }
 
-export async function getUserByUsernameAndPassword(username, password) {
-  const [rows] = await db.query('SELECT id, username FROM Users WHERE username = ? AND password = ?', [username, password]);
-  console.log(rows);
+export async function getUserByUsername(username) {
+  const [rows] = await db.query('SELECT id, username, password FROM Users WHERE username = ?', [username]);
+  //console.log(rows);
   return rows[0];
 }
 
