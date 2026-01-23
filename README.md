@@ -23,22 +23,6 @@ Aplikacja webowa umożliwiająca dodawanie, edytowanie, usuwanie, przeglądanie 
 ## Struktura serwera
 
 Ten katalog zawiera backend aplikacji oparty o Node.js, z wyraźnym podziałem odpowiedzialności zgodnie z podejściem Controller → Service → Repository.
-server/
-│
-├── constants/
-├── controller/
-├── errors/
-├── middlewares/
-├── repository/
-├── service/
-├── utils/
-├── validators/
-│
-├── db.js
-├── server.js
-├── .env
-├── package-lock.json
-└── .gitignore
 
 
 Warstwa kontrolerów – obsługuje żądania HTTP.
